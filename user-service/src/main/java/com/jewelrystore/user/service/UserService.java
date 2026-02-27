@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ public class UserService {
         log.info("Created UserProfile for email : {}", event.getEmail());
     }
 
+    @Transactional
     public UserProfileResponse getProfileByAuthId(Long authId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
@@ -48,6 +50,7 @@ public class UserService {
         return mapToResponse(profile);
     }
 
+    @Transactional
     public UserProfileResponse updateProfile(Long authId, UpdateProfileRequest request) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
                 .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
