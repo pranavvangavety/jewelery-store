@@ -5,9 +5,11 @@ import com.jewelrystore.auth.dto.LoginRequest;
 import com.jewelrystore.auth.dto.RegisterRequest;
 import com.jewelrystore.auth.entity.Role;
 import com.jewelrystore.auth.entity.User;
+import com.jewelrystore.auth.event.UserRegisteredEvent;
 import com.jewelrystore.auth.repository.UserRepository;
 import com.jewelrystore.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final KafkaTemplate<Object, UserRegisteredEvent> kafkaTemplate;
 
     public AuthResponse register(RegisterRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
@@ -34,6 +37,16 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+
+        //kafka
+        UserRegisteredEvent event = UserRegisteredEvent.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build();
+
+        kafkaTemplate.send("user-registered", event);
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
