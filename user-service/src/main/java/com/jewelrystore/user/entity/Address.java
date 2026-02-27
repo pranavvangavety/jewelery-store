@@ -37,5 +37,5 @@ public class Address {
     @Column(nullable = false)
     private String country;
 
-    private boolean isDefault;
+    private boolean defaultAddress;
 }

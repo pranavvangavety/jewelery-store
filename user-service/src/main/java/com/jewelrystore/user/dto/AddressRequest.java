@@ -1,20 +1,26 @@
 package com.jewelrystore.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddressResponse {
-    private Long id;
+public class AddressRequest {
+
+    @NotBlank
     private String street;
+
+    @NotBlank
     private String city;
+
+    @NotBlank
     private String state;
+
+    @NotBlank
     private String zipCode;
+
+    @NotBlank
     private String country;
+
     private boolean defaultAddress;
+
 }

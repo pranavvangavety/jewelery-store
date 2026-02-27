@@ -1,10 +1,13 @@
 package com.jewelrystore.user.service;
 
+import com.jewelrystore.user.dto.AddressRequest;
 import com.jewelrystore.user.dto.AddressResponse;
 import com.jewelrystore.user.dto.UpdateProfileRequest;
 import com.jewelrystore.user.dto.UserProfileResponse;
+import com.jewelrystore.user.entity.Address;
 import com.jewelrystore.user.entity.UserProfile;
 import com.jewelrystore.user.event.UserRegisteredEvent;
+import com.jewelrystore.user.repository.AddressRepository;
 import com.jewelrystore.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserProfileRepository userProfileRepository;
+    private final AddressRepository addressRepository;
 
     @KafkaListener(topics = "user-registered", groupId = "user-service-group")
     public void handleUserRegistered(UserRegisteredEvent event) {
@@ -78,7 +82,7 @@ public class UserService {
                         .state(address.getState())
                         .zipCode(address.getZipCode())
                         .country(address.getCountry())
-                        .isDefault(address.isDefault())
+                        .defaultAddress(address.isDefaultAddress())
                         .build())
                 .collect(Collectors.toList());
 
@@ -92,6 +96,80 @@ public class UserService {
                 .addresses(addresses)
                 .build();
     }
+
+    @Transactional
+    public AddressResponse addAddress(Long authId, AddressRequest request) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId)
+                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+
+        if(request.isDefaultAddress()) {
+            profile.getAddresses().forEach(a -> a.setDefaultAddress(false));
+            userProfileRepository.save(profile);
+        }
+
+        Address address = Address.builder()
+                .userProfile(profile)
+                .street(request.getStreet())
+                .city(request.getCity())
+                .state(request.getState())
+                .zipCode(request.getZipCode())
+                .country(request.getCountry())
+                .defaultAddress(request.isDefaultAddress())
+                .build();
+
+        Address saved = addressRepository.save(address);
+
+        return AddressResponse.builder()
+                .id(saved.getId())
+                .street(saved.getStreet())
+                .city(saved.getCity())
+                .state(saved.getState())
+                .zipCode(saved.getZipCode())
+                .country(saved.getCountry())
+                .defaultAddress(saved.isDefaultAddress())
+                .build();
+    }
+
+    @Transactional
+    public void deleteAddress(Long authId, Long addressId) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId)
+                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+
+        Address toDelete = profile.getAddresses().stream()
+                        .filter(a -> a.getId().equals(addressId))
+                                .findFirst()
+                                        .orElseThrow(() -> new RuntimeException("Addresss not found with id: " + addressId));
+
+        boolean wasDefault = toDelete.isDefaultAddress();
+        profile.getAddresses().remove(toDelete);
+
+        if( wasDefault && !profile.getAddresses().isEmpty()) {
+            profile.getAddresses().get(0).setDefaultAddress(true);
+        }
+
+        userProfileRepository.save(profile);
+    }
+
+    @Transactional
+    public UserProfileResponse setDefaultAddress(Long authId, Long addressId) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId)
+                .orElseThrow(() -> new RuntimeException("Profile not found with authId: " + authId));
+
+        boolean found = profile.getAddresses().stream()
+                .anyMatch(a -> a.getId().equals(addressId));
+
+
+        if(!found) {
+            throw new RuntimeException("Address not found with id: " + addressId);
+        }
+
+        profile.getAddresses().forEach(a -> a.setDefaultAddress(a.getId().equals(addressId)));
+        userProfileRepository.save(profile);
+
+        return mapToResponse(profile);
+    }
+
+
 
 
 }
