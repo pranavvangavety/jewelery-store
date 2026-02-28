@@ -5,5 +5,7 @@ public enum Material {
     GOLD,
     SILVER,
     PLATINUM,
+    ROSE_GOLD,
+    WHITE_GOLD,
     PLASTIC
 }
