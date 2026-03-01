@@ -80,4 +80,17 @@ public class ProductController {
         productService.deleteVariant(id, variantId);
         return ResponseEntity.noContent().build();
     }
+
+
+    // Image Endpoints
+
+    @PostMapping("/products/{id}/images") //ADMIN
+    public ResponseEntity<ProductResponse> addImage(@PathVariable Long id, @Valid @RequestBody ProductImageRequest request) {
+        return ResponseEntity.ok(productService.addImage(id, request));
+    }
+
+    @DeleteMapping("/products/{id}/images/{imageId}") //ADMIN
+    public ResponseEntity<ProductResponse> deleteImage(@PathVariable Long id, @PathVariable Long imageId) {
+        return ResponseEntity.ok(productService.deleteImage(id, imageId));
+    }
 }

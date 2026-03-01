@@ -1,11 +1,9 @@
 package com.jewelrystore.product.service;
 
 import com.jewelrystore.product.dto.*;
-import com.jewelrystore.product.entity.Category;
-import com.jewelrystore.product.entity.Product;
-import com.jewelrystore.product.entity.ProductStatus;
-import com.jewelrystore.product.entity.ProductVariant;
+import com.jewelrystore.product.entity.*;
 import com.jewelrystore.product.repository.CategoryRepository;
+import com.jewelrystore.product.repository.ProductImageRepository;
 import com.jewelrystore.product.repository.ProductRepository;
 import com.jewelrystore.product.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +21,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
 
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
@@ -158,6 +157,63 @@ public class ProductService {
     }
 
 
+    @Transactional
+    public ProductResponse addImage(Long productId, ProductImageRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        ProductVariant variant = product.getVariants().stream()
+                .filter(v -> v.getId().equals(request.getVariantId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Variants not found with id: " + request.getVariantId()));
+
+        if(request.isPrimary()) {
+            variant.getImages().forEach(i -> i.setPrimary(false));
+        }
+
+        ProductImage image = ProductImage.builder()
+                .variant(variant)
+                .url(request.getUrl())
+                .altText(request.getAltText())
+                .displayOrder(request.getDisplayOrder())
+                .isPrimary(request.isPrimary())
+                .build();
+
+        variant.getImages().add(productImageRepository.save(image));
+        productRepository.save(product);
+
+        log.info("Added image to variant {} of product {}",request.getVariantId(), productId);
+        return mapToResponse(product);
+    }
+
+
+    @Transactional
+    public ProductResponse deleteImage(Long productId, Long imageId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        ProductVariant variant = product.getVariants().stream()
+                .filter(v -> v.getImages().stream().anyMatch(i -> i.getId().equals(imageId)))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
+
+        ProductImage image = variant.getImages().stream()
+                .filter(i -> i.getId().equals(imageId))
+                .findFirst()
+                .get();
+
+        boolean wasPrimary = image.isPrimary();
+        variant.getImages().remove(image);
+
+        if(wasPrimary && !variant.getImages().isEmpty()){
+            variant.getImages().getFirst().setPrimary(true);
+        }
+
+        productRepository.save(product);
+        log.info("Deleted image {} from product {}", imageId, productId);
+        return mapToResponse(product);
+    }
+
 
     private ProductResponse mapToResponse(Product product) {
         List<ProductVariantResponse> variants = product.getVariants().stream()
@@ -167,17 +223,15 @@ public class ProductService {
                         .price(v.getPrice())
                         .color(v.getColor())
                         .size(v.getSize())
-                        .build())
-                .toList();
-
-
-        List<ProductImageResponse> images = product.getImages().stream()
-                .map(i -> ProductImageResponse.builder()
-                        .id(i.getId())
-                        .url(i.getUrl())
-                        .altText(i.getAltText())
-                        .displayOrder(i.getDisplayOrder())
-                        .isPrimary(i.isPrimary())
+                        .images(v.getImages().stream()
+                                .map(i -> ProductImageResponse.builder()
+                                        .id(i.getId())
+                                        .url(i.getUrl())
+                                        .altText(i.getAltText())
+                                        .displayOrder(i.getDisplayOrder())
+                                        .isPrimary(i.isPrimary())
+                                        .build())
+                                .toList())
                         .build())
                 .toList();
 
@@ -195,7 +249,6 @@ public class ProductService {
                                 .build()
                 )
                 .status(product.getStatus())
-                .images(images)
                 .variants(variants)
                 .build();
     }

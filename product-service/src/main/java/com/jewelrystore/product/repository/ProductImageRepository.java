@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long>{
 
-    List<ProductImage> findByProductIdOrderByDisplayOrder(Long productId);
+    List<ProductImage> findByVariantIdOrderByDisplayOrder(Long variantId);
 
 }

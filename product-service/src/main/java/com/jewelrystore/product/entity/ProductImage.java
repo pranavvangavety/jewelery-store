@@ -20,7 +20,7 @@ public class ProductImage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private ProductVariant variant;
 
     @Column(nullable = false)
     private String url;

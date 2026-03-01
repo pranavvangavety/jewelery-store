@@ -20,6 +20,5 @@ public class ProductResponse {
     private Material material;
     private CategoryResponse category;
     private ProductStatus status;
-    private List<ProductImageResponse> images;
     private List<ProductVariantResponse> variants;
 }
