@@ -37,6 +37,19 @@ services:
       - product-db-data:/var/lib/postgresql/data
 
 
+  inventory-db:
+    image: postgres:17
+    container_name: inventory-db
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432"
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+
+
   kafka:
     image: apache/kafka:latest
     container_name: kafka
@@ -57,3 +70,4 @@ volumes:
   auth-db-data:
   user-db-data:
   product-db-data:
+  inventory-db-data:
