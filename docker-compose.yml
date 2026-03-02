@@ -49,6 +49,14 @@ services:
     volumes:
       - inventory-db-data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:data:/data
+
 
   kafka:
     image: apache/kafka:latest
@@ -71,3 +79,4 @@ volumes:
   user-db-data:
   product-db-data:
   inventory-db-data:
+  redis-data:
