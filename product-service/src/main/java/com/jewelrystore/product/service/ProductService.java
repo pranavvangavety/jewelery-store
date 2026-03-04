@@ -253,4 +253,34 @@ public class ProductService {
                 .build();
     }
 
+
+    @Transactional(readOnly = true)
+    public ProductVariantResponse getVariantDetails(Long variantId) {
+        ProductVariant variant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Variant not found with id: " + variantId));
+
+        ProductImageResponse primaryImage = variant.getImages().stream()
+                .filter(ProductImage::isPrimary)
+                .map(i -> ProductImageResponse.builder()
+                        .id(i.getId())
+                        .url(i.getUrl())
+                        .altText(i.getAltText())
+                        .displayOrder(i.getDisplayOrder())
+                        .isPrimary(i.isPrimary())
+                        .build()
+                )
+                .findFirst()
+                .orElse(null);
+
+        return ProductVariantResponse.builder()
+                .id(variant.getId())
+                .sku(variant.getSku())
+                .price(variant.getPrice())
+                .color(variant.getColor())
+                .size(variant.getSize())
+                .productName(variant.getProduct().getName())
+                .primaryImage(primaryImage)
+                .build();
+    }
+
 }

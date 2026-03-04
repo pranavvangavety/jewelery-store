@@ -19,4 +19,6 @@ public class ProductVariantResponse {
     private String color;
     private String size;
     private List<ProductImageResponse> images;
+    private String productName;
+    private ProductImageResponse primaryImage;
 }

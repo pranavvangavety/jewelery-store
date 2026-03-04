@@ -6,6 +6,7 @@ import com.jewelrystore.product.service.CategoryService;
 import com.jewelrystore.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,6 +80,11 @@ public class ProductController {
     public ResponseEntity<Void> deleteVariant(@PathVariable Long id, @PathVariable Long variantId) {
         productService.deleteVariant(id, variantId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/products/variants/{variantId}/details")
+    public ResponseEntity<ProductVariantResponse> getVariantDetails(@PathVariable Long variantId) {
+        return ResponseEntity.ok(productService.getVariantDetails(variantId));
     }
 
 

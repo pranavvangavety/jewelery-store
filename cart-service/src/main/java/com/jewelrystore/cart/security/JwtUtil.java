@@ -3,6 +3,7 @@ package com.jewelrystore.cart.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +11,12 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
-    private long expirationMs;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -37,8 +37,11 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try{
             Claims claims = extractClaims(token);
+            log.info("Token expiration: {}", claims.getExpiration());
+            log.info("Current time: {}", new Date());
             return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
+            log.error("Token validation failed: {}", e.getMessage());
             return false;
         }
     }
