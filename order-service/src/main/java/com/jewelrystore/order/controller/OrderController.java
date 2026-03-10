@@ -21,9 +21,8 @@ public class OrderController {
     public ResponseEntity<OrderResponse> placeOrder(
             @Valid @RequestBody PlaceOrderRequest request,
             @RequestHeader(value = "X-User-Id", required = false) Long userId,
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
-        return ResponseEntity.ok(orderService.placeOrder(request, userId, authHeader, sessionId));
+        return ResponseEntity.ok(orderService.placeOrder(request, userId, sessionId));
     }
 
     @GetMapping("/{orderId}")
@@ -31,8 +30,8 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByUser(@PathVariable Long userId) {
+    @GetMapping("/history")
+    public ResponseEntity<List<OrderResponse>> getOrdersByUser(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));
     }
 }

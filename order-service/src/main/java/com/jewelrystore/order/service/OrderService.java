@@ -37,9 +37,9 @@ public class OrderService {
     private final RestClient paymentClient;
 
     @Transactional
-    public OrderResponse placeOrder(PlaceOrderRequest request, Long userId, String authHeader, String sessionId) {
+    public OrderResponse placeOrder(PlaceOrderRequest request, Long userId, String sessionId) {
 
-        CartResponse cart = fetchCart(authHeader, sessionId);
+        CartResponse cart = fetchCart(userId, sessionId);
 
         if (cart == null || cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty or not found");
@@ -115,7 +115,7 @@ public class OrderService {
         orderItems.forEach(item -> item.setOrder(order));
         Order savedOrder = orderRepository.save(order);
 
-        clearCart(authHeader, sessionId);
+        clearCart(userId, sessionId);
 
         PaymentResponse payment = paymentClient.post()
                 .uri("/payments")
@@ -173,11 +173,11 @@ public class OrderService {
                 .stream().map(this::mapToResponse).toList();
     }
 
-    private CartResponse fetchCart(String authHeader, String sessionId) {
-        if (authHeader != null) {
+    private CartResponse fetchCart(Long userId, String sessionId) {
+        if (userId != null) {
             return cartClient.get()
                     .uri("/cart")
-                    .header("Authorization", authHeader)
+                    .header("X-User-Id", userId.toString())
                     .retrieve()
                     .body(CartResponse.class);
         } else if (sessionId != null) {
@@ -187,15 +187,15 @@ public class OrderService {
                     .retrieve()
                     .body(CartResponse.class);
         } else {
-            throw new RuntimeException("No identity provided - supply Authorization or X-Session-Id header");
+            throw new RuntimeException("No identity provided - supply X-User-Id or X-Session-Id");
         }
     }
 
-    private void clearCart(String authHeader, String sessionId) {
-        if (authHeader != null) {
+    private void clearCart(Long userId, String sessionId) {
+        if (userId != null) {
             cartClient.delete()
                     .uri("/cart")
-                    .header("Authorization", authHeader)
+                    .header("X-User-Id", userId.toString())
                     .retrieve()
                     .toBodilessEntity();
         } else {
