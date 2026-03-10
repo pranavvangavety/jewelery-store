@@ -37,8 +37,8 @@ export function AuthProvider({children}) {
             {children}
         </AuthContext.Provider>
     )
+}
 
-    export function useAuth() {
-        return useContext(AuthContext)
-    }
+export function useAuth() {
+    return useContext(AuthContext)
 }
