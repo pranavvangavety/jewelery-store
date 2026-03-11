@@ -1,6 +1,7 @@
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import "./ProductCard.css";
 
-export default function ProductCard({product}) {
+export default function ProductCard({ product }) {
     const navigate = useNavigate()
 
     const primaryImage = product.variants
@@ -10,14 +11,24 @@ export default function ProductCard({product}) {
     const lowestPrice = Math.min(...product.variants.map(v => v.price))
 
     return (
-        <div onClick={() => navigate(`/products/${product.id}`)}>
-            <img
-                src={primaryImage || 'https://placehold.co/300x300?text=No+Image'}
-                alt={product.name}
-            />
-            <h3>{product.name}</h3>
-            <p>{product.material}</p>
-            <p>From ${lowestPrice}</p>
+        <div className="product-card" onClick={() => navigate(`/products/${product.id}`)}>
+            <div className="card-img-wrap">
+                <img
+                    className="card-img"
+                    src={primaryImage || '/placeholder.jpg'}
+                    alt={product.name}
+                />
+            </div>
+            <div className="card-body">
+                <div className="card-material">{product.material.replace(/_/g, ' ')}</div>
+                <div className="card-name">{product.name}</div>
+                <div className="card-footer">
+                    <div className="card-price">
+                        <span className="card-price-label">from</span>
+                        ${lowestPrice.toLocaleString()}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
