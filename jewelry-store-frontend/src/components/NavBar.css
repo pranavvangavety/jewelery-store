@@ -1,0 +1,112 @@
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 72px;
+}
+
+.nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: 0.25rem;
+    text-transform: uppercase;
+    color: var(--cream);
+}
+
+.nav-logo span {
+    color: var(--gold);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: var(--cream);
+}
+
+.nav-link.gold {
+    color: var(--gold);
+}
+
+.nav-link.gold:hover {
+    color: var(--gold-light);
+}
+
+.nav-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+}
+
+.cart-link {
+    position: relative;
+    color: var(--cream);
+    font-size: 1.1rem;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 0.55rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.nav-categories {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    height: 40px;
+    border-top: 1px solid var(--border);
+    background: var(--deep);
+}
+
+.nav-category {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.2s, border-bottom-color 0.2s;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+}
+
+.nav-category:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+}
