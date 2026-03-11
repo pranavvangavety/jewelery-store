@@ -7,7 +7,6 @@ import "./NavBar.css";
 
 export default function NavBar() {
     const {user, logout} = useAuth()
-    console.log(user)
     const [categories, setCategories] = useState([])
 
 
