@@ -169,6 +169,22 @@ public class UserService {
         return mapToResponse(profile);
     }
 
+    @Transactional
+    public AddressResponse getAddressById(Long addressId) {
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found: " + addressId));
+
+        return AddressResponse.builder()
+                .id(address.getId())
+                .street(address.getStreet())
+                .city(address.getCity())
+                .state(address.getState())
+                .zipCode(address.getZipCode())
+                .country(address.getCountry())
+                .defaultAddress(address.isDefaultAddress())
+                .build();
+    }
+
 
 
 
