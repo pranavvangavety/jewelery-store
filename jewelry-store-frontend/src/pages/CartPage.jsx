@@ -1,6 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import {getCart, removeCartItem, updateCartItem} from "../api/cartApi.js";
 import {useEffect, useState} from "react";
+import "./CartPage.css"
 
 export default function CartPage(){
     const [cart, setCart] = useState(null)
@@ -42,45 +43,72 @@ export default function CartPage(){
         }
     }
 
-    if(loading) return <p>Loading...</p>
-    if(error) return <p>{error}</p>
-    if(!cart || cart.items.length === 0) return <p>Your cart is empty.</p>
+    if(loading) return <div className="cart-loading">Loading...</div>
+    if(error) return <div className="cart-error">{error}</div>
+    if(!cart || cart.items.length === 0) return <div className="cart-empty">Your cart is empty!</div>
 
     return (
-        <div>
-            <h2>Your Cart</h2>
+        <div className="cart-page">
 
-            {cart.items.map(item => (
-                <div key={item.variantId}>
-                    <img
-                        src={item.imageUrl || 'https://placehold.co/100x100?text=No+Image'}
-                        alt={item.productName}
-                    />
-                    <div>
-                        <p>{item.productName}</p>
-                        <p>{[item.color, item.size].filter(Boolean).join('/')}</p>
-                        <p>${item.price}</p>
+            <div className="cart-header">
+                <h1 className="cart-title">Your Cart</h1>
+                <p className="cart-count">{cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}</p>
+            </div>
+
+            <div className="cart-items">
+                {cart.items.map(item => (
+                    <div key={item.variantId} className="cart-item">
+
+                        <div className="cart-item-img-wrap">
+                            <img
+                                src={item.imageUrl || '/placeholder.jpg'}
+                                alt={item.productName}
+                                className="cart-item-img"
+                            />
+                        </div>
+
+                        <div className="cart-item-details">
+                            <p className="cart-item-name">{item.productName}</p>
+                            <p className="cart-item-variant">
+                                {[item.color, item.size].filter(Boolean).join(' / ')}
+                            </p>
+                            <p className="cart-item-price">${item.price}</p>
+                        </div>
+
+                        <div className="cart-item-qty">
+                            <button
+                                className="cart-qty-btn"
+                                onClick={() => handleQuantityChange(item.variantId, item.quantity - 1)}
+                                disabled={item.quantity <= 1}
+                            >−</button>
+                            <span className="cart-qty-value">{item.quantity}</span>
+                            <button
+                                className="cart-qty-btn"
+                                onClick={() => handleQuantityChange(item.variantId, item.quantity + 1)}
+                            >+</button>
+                        </div>
+
+                        <div className="cart-item-right">
+                            <span className="cart-item-total">${item.itemTotal}</span>
+                            <button
+                                className="cart-remove-btn"
+                                onClick={() => handleRemove(item.variantId)}
+                            >Remove</button>
+                        </div>
+
                     </div>
-                    <div>
-                        <button onClick={
-                            () => handleQuantityChange(item.variantId, item.quantity - 1)
-                        } disabled={item.quantity <= 1}>
-                            -
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button onClick={
-                            () => handleQuantityChange(item.variantId, item.quantity + 1)
-                        }>
-                            +
-                        </button>
-                    </div>
-                    <p>{item.itemTotal}</p>
-                    <button onClick={() => handleRemove(item.variantId)}>Remove</button>
+                ))}
+            </div>
+
+            <div className="cart-summary">
+                <div className="cart-total-row">
+                    <span className="cart-total-label">Total</span>
+                    <span className="cart-total-value">${cart.totalPrice}</span>
                 </div>
-            ))}
-
-            <p>Total: ${cart.totalPrice}</p>
-            <button onClick={() => navigate('/checkout')}>Proceed to checkout</button>
+                <button className="cart-checkout-btn" onClick={() => navigate('/checkout')}>
+                    Proceed to Checkout
+                </button>
+            </div>
 
         </div>
     )
