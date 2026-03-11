@@ -1,7 +1,8 @@
-import {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import {registerUser} from "../api/authApi.js";
-import {useAuth} from "../context/AuthContext.jsx";
+import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { registerUser } from "../api/authApi.js"
+import { useAuth } from "../context/AuthContext.jsx"
+import "./Auth.css"
 
 export default function RegisterPage() {
     const [firstName, setFirstName] = useState('')
@@ -12,74 +13,96 @@ export default function RegisterPage() {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
-    const {login} = useAuth()
+    const { login } = useAuth()
     const navigate = useNavigate()
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
-
         try {
             const response = await registerUser(firstName, lastName, email, password)
             login(response.data)
             navigate('/')
-        } catch(err) {
-            setError('Unable to create user')
+        } catch (err) {
+            setError('Unable to create account')
         } finally {
             setLoading(false)
         }
     }
 
-    return(
-        <div>
-            <h2>Register</h2>
-            {error && <p>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>First Name</label>
-                    <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        required
-                    />
+    return (
+        <div className="auth-page">
+            <div className="auth-card">
+
+                <div className="auth-header">
+                    <h1 className="auth-title">Create Account</h1>
+                    <p className="auth-subtitle">Join us today</p>
                 </div>
-                <div>
-                    <label>Last Name</label>
+
+                <div className="auth-form">
+                    {error && <p className="auth-error">{error}</p>}
+
+                    <div className="auth-name-row">
+                        <input
+                            className="auth-input"
+                            type="text"
+                            placeholder="First Name"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            required
+                        />
+                        <input
+                            className="auth-input"
+                            type="text"
+                            placeholder="Last Name"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            required
+                        />
+                    </div>
+
                     <input
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Email</label>
-                    <input
+                        className="auth-input"
                         type="email"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? 'Hide' : 'Show'}
+
+                    <div className="auth-password-wrap">
+                        <input
+                            className="auth-input"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className="auth-show-btn"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
+
+                    <button
+                        className="auth-submit-btn"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? 'Creating Account...' : 'Create Account'}
                     </button>
                 </div>
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Registering...' : 'Register'}
-                </button>
-            </form>
-            <p>Already have an account? <Link to="/login">Login</Link></p>
+
+                <p className="auth-footer">
+                    Already have an account? <Link to="/login">Sign in</Link>
+                </p>
+
+            </div>
         </div>
     )
 }

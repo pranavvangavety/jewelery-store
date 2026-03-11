@@ -1,7 +1,8 @@
-import {useState} from "react";
-import {useAuth} from "../context/AuthContext.jsx";
-import {Link, useNavigate} from "react-router-dom";
-import {loginUser} from "../api/authApi.js";
+import { useState } from "react"
+import { useAuth } from "../context/AuthContext.jsx"
+import { Link, useNavigate } from "react-router-dom"
+import { loginUser } from "../api/authApi.js"
+import "./Auth.css"
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -10,57 +11,77 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
-    const {login} = useAuth()
+    const { login } = useAuth()
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
         setError(null)
-
-        try{
+        try {
             const response = await loginUser(email, password)
             login(response.data)
             navigate('/')
-        } catch(err) {
+        } catch (err) {
             setError('Invalid email or password')
         } finally {
             setLoading(false)
         }
     }
 
-    return(
-        <div>
-            <h2>Login</h2>
-            {error && <p>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>
-                        Email
-                    </label>
+    return (
+        <div className="auth-page">
+            <div className="auth-card">
+
+                <div className="auth-header">
+                    <h1 className="auth-title">Welcome Back</h1>
+                    <p className="auth-subtitle">Sign in to your account</p>
+                </div>
+
+                <div className="auth-form">
+                    {error && <p className="auth-error">{error}</p>}
+
                     <input
+                        className="auth-input"
                         type="email"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required/>
-                    <button type = "button" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? 'Hide' : 'Show'}
+
+                    <div className="auth-password-wrap">
+                        <input
+                            className="auth-input"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button
+                            type="button"
+                            className="auth-show-btn"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? 'Hide' : 'Show'}
+                        </button>
+                    </div>
+
+                    <button
+                        className="auth-submit-btn"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </div>
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
-            </form>
-            <p>Don't have an account? <Link to="/register"> Register</Link></p>
+
+                <p className="auth-footer">
+                    Don't have an account? <Link to="/register">Create one</Link>
+                </p>
+
+            </div>
         </div>
     )
 }
