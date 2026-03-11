@@ -35,9 +35,9 @@ export default function ProductsPage() {
         <div className="products-page">
             <div className="products-header">
                 <h1 className="products-title">
-                    {categoryId ? 'Collection' : 'All Pieces'}
+                    {categoryId ? 'Collection' : 'All Products'}
                 </h1>
-                <p className="products-count">{products.length} pieces</p>
+                <p className="products-count">{products.length} products</p>
             </div>
 
             {products.length === 0 ? (

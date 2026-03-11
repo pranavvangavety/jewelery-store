@@ -176,7 +176,7 @@ public class ProductService {
                 .url(request.getUrl())
                 .altText(request.getAltText())
                 .displayOrder(request.getDisplayOrder())
-                .isPrimary(request.isPrimary())
+                .primary(request.isPrimary())
                 .build();
 
         variant.getImages().add(productImageRepository.save(image));
@@ -229,7 +229,7 @@ public class ProductService {
                                         .url(i.getUrl())
                                         .altText(i.getAltText())
                                         .displayOrder(i.getDisplayOrder())
-                                        .isPrimary(i.isPrimary())
+                                        .primary(i.isPrimary())
                                         .build())
                                 .toList())
                         .build())
@@ -266,7 +266,7 @@ public class ProductService {
                         .url(i.getUrl())
                         .altText(i.getAltText())
                         .displayOrder(i.getDisplayOrder())
-                        .isPrimary(i.isPrimary())
+                        .primary(i.isPrimary())
                         .build()
                 )
                 .findFirst()

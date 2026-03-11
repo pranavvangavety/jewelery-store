@@ -30,6 +30,6 @@ public class ProductImage {
     @Column(nullable = false)
     private int displayOrder;
 
-    @Column(nullable = false)
-    private boolean isPrimary;
+    @Column(name = "is_primary", nullable = false)
+    private boolean primary;
 }

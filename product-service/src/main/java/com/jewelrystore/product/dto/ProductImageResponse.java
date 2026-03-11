@@ -14,5 +14,5 @@ public class ProductImageResponse {
     private String url;
     private String altText;
     private int displayOrder;
-    private boolean isPrimary;
+    private boolean primary;
 }
