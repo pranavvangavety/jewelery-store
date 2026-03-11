@@ -12,6 +12,7 @@ import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage.jsx";
 import OrderHistoryPage from "./pages/OrderHistory.jsx";
+import HomePage from "./pages/HomePage.jsx";
 
 function App() {
 
@@ -19,7 +20,7 @@ function App() {
     <BrowserRouter>
         <NavBar/>
         <Routes>
-            <Route path="/" element={<div>Home Page</div>} />
+            <Route path="/" element={<HomePage/>} />
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/register" element={<RegisterPage/>}/>
             <Route path="/products" element={<ProductsPage/>}/>
