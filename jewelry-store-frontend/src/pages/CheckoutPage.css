@@ -221,3 +221,59 @@
     text-align: center;
     padding: 24px 0;
 }
+
+.checkout-saved-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.checkout-address-card {
+    border: 1px solid var(--border);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.checkout-address-card:hover {
+    border-color: var(--muted);
+}
+
+.checkout-address-card.active {
+    border-color: var(--gold);
+}
+
+.checkout-address-line {
+    font-size: 0.8rem;
+    color: var(--cream);
+    line-height: 1.6;
+}
+
+.checkout-address-default {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 6px;
+    display: block;
+}
+
+.checkout-save-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+.checkout-save-label input[type="checkbox"] {
+    accent-color: var(--gold);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}

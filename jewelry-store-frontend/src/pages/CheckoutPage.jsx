@@ -2,10 +2,13 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { placeOrder } from "../api/orderApi.js"
 import { getCart } from "../api/cartApi.js"
+import { getMyProfile, addAddress } from "../api/userApi.js"
+import { useAuth } from "../context/AuthContext.jsx"
 import "./CheckoutPage.css"
 
 export default function CheckoutPage() {
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     const [form, setForm] = useState({
         firstName: '',
@@ -21,6 +24,9 @@ export default function CheckoutPage() {
 
     const [cart, setCart] = useState(null)
     const [cartLoading, setCartLoading] = useState(true)
+    const [savedAddresses, setSavedAddresses] = useState([])
+    const [selectedAddressId, setSelectedAddressId] = useState(null)
+    const [saveAddress, setSaveAddress] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -38,6 +44,30 @@ export default function CheckoutPage() {
         fetchCart()
     }, [])
 
+    useEffect(() => {
+        if (!user) return
+        const fetchProfile = async () => {
+            try {
+                const response = await getMyProfile()
+                const profile = response.data
+                setForm(prev => ({
+                    ...prev,
+                    firstName: profile.firstName || '',
+                    lastName: profile.lastName || '',
+                    email: profile.email || '',
+                    phone: profile.phone || '',
+                }))
+                setSavedAddresses(profile.addresses || [])
+
+                const defaultAddr = profile.addresses?.find(a => a.defaultAddress)
+                if (defaultAddr) setSelectedAddressId(defaultAddr.id)
+            } catch (err) {
+                // nothing
+            }
+        }
+        fetchProfile()
+    }, [user])
+
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
@@ -46,8 +76,31 @@ export default function CheckoutPage() {
         e.preventDefault()
         setLoading(true)
         setError(null)
+
         try {
-            const response = await placeOrder(form)
+
+            if (user && saveAddress && !selectedAddressId) {
+                await addAddress({
+                    street: form.shippingStreet,
+                    city: form.shippingCity,
+                    state: form.shippingState,
+                    zipCode: form.shippingZipCode,
+                    country: form.shippingCountry,
+                    defaultAddress: savedAddresses.length === 0,
+                })
+            }
+
+            const orderPayload = selectedAddressId
+                ? {
+                    firstName: form.firstName,
+                    lastName: form.lastName,
+                    email: form.email,
+                    phone: form.phone,
+                    addressId: selectedAddressId,
+                }
+                : { ...form }
+
+            const response = await placeOrder(orderPayload)
             navigate(`/orders/confirmation/${response.data.id}`)
         } catch (err) {
             setError('Failed to place order. Please try again.')
@@ -55,6 +108,9 @@ export default function CheckoutPage() {
             setLoading(false)
         }
     }
+
+    const isNewAddress = !selectedAddressId
+    const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId)
 
     return (
         <div className="checkout-page">
@@ -109,46 +165,86 @@ export default function CheckoutPage() {
 
                     <div className="checkout-section">
                         <p className="checkout-section-label">Shipping Address</p>
-                        <input
-                            className="checkout-input"
-                            name="shippingStreet"
-                            placeholder="Street"
-                            value={form.shippingStreet}
-                            onChange={handleChange}
-                            required
-                        />
-                        <input
-                            className="checkout-input"
-                            name="shippingCity"
-                            placeholder="City"
-                            value={form.shippingCity}
-                            onChange={handleChange}
-                            required
-                        />
-                        <input
-                            className="checkout-input"
-                            name="shippingState"
-                            placeholder="State"
-                            value={form.shippingState}
-                            onChange={handleChange}
-                            required
-                        />
-                        <input
-                            className="checkout-input"
-                            name="shippingZipCode"
-                            placeholder="Zip Code"
-                            value={form.shippingZipCode}
-                            onChange={handleChange}
-                            required
-                        />
-                        <input
-                            className="checkout-input"
-                            name="shippingCountry"
-                            placeholder="Country"
-                            value={form.shippingCountry}
-                            onChange={handleChange}
-                            required
-                        />
+
+                        {savedAddresses.length > 0 && (
+                            <div className="checkout-saved-addresses">
+                                {savedAddresses.map(addr => (
+                                    <div
+                                        key={addr.id}
+                                        className={`checkout-address-card ${selectedAddressId === addr.id ? 'active' : ''}`}
+                                        onClick={() => setSelectedAddressId(addr.id)}
+                                    >
+                                        <p className="checkout-address-line">{addr.street}</p>
+                                        <p className="checkout-address-line">{addr.city}, {addr.state} {addr.zipCode}</p>
+                                        <p className="checkout-address-line">{addr.country}</p>
+                                        {addr.defaultAddress && (
+                                            <span className="checkout-address-default">Default</span>
+                                        )}
+                                    </div>
+                                ))}
+                                <div
+                                    className={`checkout-address-card ${isNewAddress ? 'active' : ''}`}
+                                    onClick={() => setSelectedAddressId(null)}
+                                >
+                                    <p className="checkout-address-line">+ Enter a new address</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {isNewAddress && (
+                            <>
+                                <input
+                                    className="checkout-input"
+                                    name="shippingStreet"
+                                    placeholder="Street"
+                                    value={form.shippingStreet}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <input
+                                    className="checkout-input"
+                                    name="shippingCity"
+                                    placeholder="City"
+                                    value={form.shippingCity}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <input
+                                    className="checkout-input"
+                                    name="shippingState"
+                                    placeholder="State"
+                                    value={form.shippingState}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <input
+                                    className="checkout-input"
+                                    name="shippingZipCode"
+                                    placeholder="Zip Code"
+                                    value={form.shippingZipCode}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                <input
+                                    className="checkout-input"
+                                    name="shippingCountry"
+                                    placeholder="Country"
+                                    value={form.shippingCountry}
+                                    onChange={handleChange}
+                                    required
+                                />
+                                {user && (
+                                    <label className="checkout-save-label">
+                                        <input
+                                            type="checkbox"
+                                            checked={saveAddress}
+                                            onChange={(e) => setSaveAddress(e.target.checked)}
+                                        />
+                                        Save this address
+                                    </label>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     <button
@@ -173,7 +269,7 @@ export default function CheckoutPage() {
                                     <div key={item.variantId} className="checkout-summary-item">
                                         <div className="checkout-summary-img-wrap">
                                             <img
-                                                src={item.imageUrl || '/placeholder.jpg'}
+                                                src={item.imageUrl || 'https://placehold.co/56x70?text=No+Image'}
                                                 alt={item.productName}
                                                 className="checkout-summary-img"
                                             />
