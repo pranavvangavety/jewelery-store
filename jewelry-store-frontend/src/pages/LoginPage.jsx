@@ -11,7 +11,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
-    const { login } = useAuth()
+    const { setCurrentUser } = useAuth()
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ export default function LoginPage() {
         setError(null)
         try {
             const response = await loginUser(email, password)
-            login(response.data)
+            setCurrentUser(response.data)
             navigate('/')
         } catch (err) {
             setError('Invalid email or password')

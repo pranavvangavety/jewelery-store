@@ -31,7 +31,9 @@ export default function NavBar() {
                 <div className="nav-right">
                     {user ? (
                         <>
-                            <span className="nav-link">Hi, {user.firstName}</span>
+                            {/*<span className="nav-link">Hi, {user.firstName}</span>*/}
+                            {/*<div className="nav-divider"/>*/}
+                            <Link to="/profile" className="nav-link">Hi, {user.firstName}</Link>
                             <div className="nav-divider"/>
                             <Link to="/orders" className="nav-link">My Orders</Link>
                             <div className="nav-divider"/>
