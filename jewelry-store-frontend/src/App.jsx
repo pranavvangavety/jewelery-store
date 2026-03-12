@@ -13,6 +13,7 @@ import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage.jsx";
 import OrderHistoryPage from "./pages/OrderHistory.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage/>}/>
             <Route path="/orders/confirmation/:orderId" element={<OrderConfirmationPage/>}/>
             <Route path="/orders/" element={<OrderHistoryPage/>}/>
+            <Route path="/profile" element={<ProfilePage/>}/>
         </Routes>
     </BrowserRouter>
   )

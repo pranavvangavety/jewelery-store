@@ -1,0 +1,285 @@
+.profile-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 64px 48px;
+    min-height: calc(100vh - 112px);
+}
+
+.profile-loading {
+    min-height: calc(100vh - 112px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-loading-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.profile-header {
+    margin-bottom: 20px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-eyebrow {
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+}
+
+.profile-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--cream);
+    margin-bottom: 8px;
+}
+
+.profile-email {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+}
+
+.profile-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+}
+
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.profile-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profile-section-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+}
+
+.profile-section-header .profile-section-title {
+    border-bottom: none;
+    padding-bottom: 0;
+    width: auto;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.profile-name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.profile-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.profile-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.profile-input::placeholder {
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+}
+
+.profile-input:focus {
+    border-color: var(--gold);
+}
+
+.profile-input--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.profile-error {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #c0392b;
+}
+
+.profile-success {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #6aab7e;
+}
+
+.profile-save-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--gold);
+    color: var(--black);
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+}
+
+.profile-save-btn:hover:not(:disabled) {
+    background: var(--gold-light);
+}
+
+.profile-save-btn:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+}
+
+.profile-add-btn {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.profile-add-btn:hover {
+    color: var(--gold-light);
+}
+
+.address-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    background: var(--deep);
+    border: 1px solid var(--border);
+}
+
+.address-city-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.profile-empty {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 24px 0;
+}
+
+.address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.address-card {
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.2s;
+}
+
+.address-card--default {
+    border-color: var(--gold);
+}
+
+.address-default-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 3px 10px;
+    margin-bottom: 10px;
+}
+
+.address-street {
+    font-size: 0.82rem;
+    color: var(--cream);
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+}
+
+.address-line {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+}
+
+.address-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.address-action-btn {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+.address-action-btn:hover {
+    color: var(--cream);
+}
+
+.address-action-btn--delete:hover {
+    color: #c0392b;
+}
