@@ -56,6 +56,7 @@ export default function NavBar() {
             </div>
 
             <div className="nav-categories">
+                <Link className="nav-category" to="/products">All</Link>
                 {categories.map(category => (
                     <Link className="nav-category" key={category.id} to={`/products?categoryId=${category.id}`}>
                         {category.name}
