@@ -8,7 +8,7 @@ import "./CheckoutPage.css"
 
 export default function CheckoutPage() {
     const navigate = useNavigate()
-    const { user } = useAuth()
+    const { user, setCartCount } = useAuth()
 
     const [form, setForm] = useState({
         firstName: '',
@@ -35,6 +35,7 @@ export default function CheckoutPage() {
             try {
                 const response = await getCart()
                 setCart(response.data)
+                setCartCount(response.data.totalItems)
             } catch (err) {
                 // nothing
             } finally {
@@ -101,6 +102,7 @@ export default function CheckoutPage() {
                 : { ...form }
 
             const response = await placeOrder(orderPayload)
+            setCartCount(0)
             navigate(`/orders/confirmation/${response.data.id}`)
         } catch (err) {
             setError('Failed to place order. Please try again.')

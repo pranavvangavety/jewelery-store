@@ -10,6 +10,9 @@ export function AuthProvider({children}) {
         }
     )
 
+    const [cartCount, setCartCount] = useState(0)
+
+
     const [sessionId] = useState(
         () => {
             const existing = localStorage.getItem('sessionId')
@@ -33,7 +36,7 @@ export function AuthProvider({children}) {
     }
 
     return (
-        <AuthContext.Provider value={{user, setCurrentUser, logout, sessionId}}>
+        <AuthContext.Provider value={{user, setCurrentUser, logout, sessionId, cartCount, setCartCount}}>
             {children}
         </AuthContext.Provider>
     )

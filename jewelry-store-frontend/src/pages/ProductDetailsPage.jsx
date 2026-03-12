@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import {addToCart} from "../api/cartApi.js";
 import {getProductById} from "../api/productApi.js";
 import "./ProductDetailsPage.css"
+import {useAuth} from "../context/AuthContext.jsx";
 
 export default function ProductDetailsPage() {
     const {id} = useParams()
@@ -15,6 +16,8 @@ export default function ProductDetailsPage() {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [cartStatus, setCartStatus] = useState(null)
+
+    const { setCartCount } = useAuth()
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -39,7 +42,8 @@ export default function ProductDetailsPage() {
         if(!selectedVariant) return
         setCartStatus(null)
         try{
-            await addToCart(selectedVariant.id, quantity)
+            const response = await addToCart(selectedVariant.id, quantity)
+            setCartCount(response.data.totalItems)
             setCartStatus('success')
         } catch (err) {
             setCartStatus('error')

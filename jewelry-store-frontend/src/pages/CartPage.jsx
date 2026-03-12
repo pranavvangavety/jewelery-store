@@ -2,17 +2,20 @@ import {useNavigate} from "react-router-dom";
 import {getCart, removeCartItem, updateCartItem} from "../api/cartApi.js";
 import {useEffect, useState} from "react";
 import "./CartPage.css"
+import {useAuth} from "../context/AuthContext.jsx";
 
 export default function CartPage(){
     const [cart, setCart] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const navigate = useNavigate()
+    const { setCartCount } = useAuth()
 
     const fetchCart =  async() => {
         try{
             const response = await getCart()
             setCart(response.data)
+            setCartCount(response.data.totalItems)
         } catch (err) {
             setError('Failed to load cart')
         } finally{
@@ -29,6 +32,7 @@ export default function CartPage(){
         try {
             const response = await updateCartItem(variantId, newQuantity)
             setCart(response.data)
+            setCartCount(response.data.totalItems)
         } catch(err) {
             alert('Failed to update quantity')
         }
@@ -38,6 +42,7 @@ export default function CartPage(){
         try{
             const response = await removeCartItem(variantId)
             setCart(response.data)
+            setCartCount(response.data.totalItems)
         } catch (err) {
             alert('Failed to remove item')
         }

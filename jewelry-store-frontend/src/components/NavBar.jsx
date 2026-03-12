@@ -5,8 +5,9 @@ import {getAllCategories} from "../api/productApi.js";
 import { ShoppingBag } from "lucide-react";
 import "./NavBar.css";
 
+
 export default function NavBar() {
-    const {user, logout} = useAuth()
+    const {user, logout, cartCount} = useAuth()
     const [categories, setCategories] = useState([])
 
 
@@ -49,7 +50,7 @@ export default function NavBar() {
                     )}
                     <Link to="/cart" className="cart-link">
                     <ShoppingBag size={20} strokeWidth={1.5}/>
-                    <span className="cart-badge">0</span>
+                    <span className="cart-badge">{cartCount}</span>
                     </Link>
                 </div>
             </div>
