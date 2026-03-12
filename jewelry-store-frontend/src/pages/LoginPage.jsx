@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.jsx"
 import { Link, useNavigate } from "react-router-dom"
 import { loginUser } from "../api/authApi.js"
 import "./Auth.css"
+import {mergeCart} from "../api/cartApi.js";
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -11,7 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
-    const { setCurrentUser } = useAuth()
+    const { setCurrentUser,sessionId, setCartCount } = useAuth()
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
@@ -21,6 +22,12 @@ export default function LoginPage() {
         try {
             const response = await loginUser(email, password)
             setCurrentUser(response.data)
+            try {
+                const mergeResponse = await mergeCart(sessionId)
+                setCartCount(mergeResponse.data.totalItems)
+            } catch (err) {
+                // nothing?
+            }
             navigate('/')
         } catch (err) {
             setError('Invalid email or password')

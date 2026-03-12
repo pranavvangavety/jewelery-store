@@ -15,3 +15,7 @@ export const updateCartItem = (variantId, quantity) => {
 export const removeCartItem = (variantId) => {
     return axiosInstance.delete(`/cart/items/${variantId}`)
 }
+
+export const mergeCart = (guestSessionId) => {
+    return axiosInstance.post('/cart/merge', { guestSessionId })
+}
