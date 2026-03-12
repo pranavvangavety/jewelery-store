@@ -277,3 +277,31 @@
     height: 14px;
     cursor: pointer;
 }
+
+/*for mobile
+*/
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .checkout-page {
+        padding: 24px 16px;
+    }
+
+    .checkout-title {
+        font-size: 1.8rem;
+    }
+
+    .checkout-body {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .checkout-summary {
+        position: static;
+        padding: 24px;
+    }
+
+    .checkout-name-row {
+        grid-template-columns: 1fr;
+    }
+}

@@ -212,3 +212,29 @@
 }
 
 .oh-error { color: #c0392b; }
+
+/*for mobile*/
+
+@media (max-width: 640px) {
+    .oh-page {
+        padding: 24px 16px;
+    }
+
+    .oh-title {
+        font-size: 1.8rem;
+    }
+
+    .oh-card-body {
+        grid-template-columns: 80px 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .oh-img-wrap {
+        width: 80px;
+        grid-row: 1 / 3;
+    }
+
+    .oh-card-right {
+        grid-column: 2;
+    }
+}

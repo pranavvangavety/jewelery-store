@@ -238,3 +238,13 @@
     text-transform: uppercase;
     color: var(--muted);
 }
+
+/*Mobile*/
+
+@media (max-width: 768px) {
+    .pdp-page {
+        grid-template-columns: 1fr;
+        padding: 20px 16px;
+        gap: 32px;
+    }
+}

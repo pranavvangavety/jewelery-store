@@ -110,3 +110,48 @@
     color: var(--gold);
     border-bottom-color: var(--gold);
 }
+
+/*For mobile*/
+
+@media (max-width: 640px) {
+    .nav-top {
+        padding: 0 20px;
+        height: 60px;
+    }
+
+    .nav-logo {
+        font-size: 1.2rem;
+    }
+
+    .nav-right {
+        gap: 14px;
+    }
+
+    .nav-link:not(.gold):not([href]) {
+        display: none;
+    }
+
+    .nav-divider {
+        display: none;
+    }
+
+    .nav-categories {
+        gap: 0;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding: 0 20px;
+        scrollbar-width: none;
+    }
+
+    .nav-categories::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-category {
+        flex-shrink: 0;
+        padding: 0 16px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+}

@@ -111,3 +111,15 @@
     color: var(--cream);
     font-weight: 300;
 }
+
+/*For mobile*/
+
+@media (max-width: 768px) {
+    .card-name {
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 12px 12px 16px;
+    }
+}
