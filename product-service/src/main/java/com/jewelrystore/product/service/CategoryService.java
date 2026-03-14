@@ -4,6 +4,8 @@ import com.github.slugify.Slugify;
 import com.jewelrystore.product.dto.CategoryRequest;
 import com.jewelrystore.product.dto.CategoryResponse;
 import com.jewelrystore.product.entity.Category;
+import com.jewelrystore.product.exception.DuplicateResourceException;
+import com.jewelrystore.product.exception.ResourceNotFoundException;
 import com.jewelrystore.product.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,7 @@ public class CategoryService {
 
     public CategoryResponse createCategory(CategoryRequest request) {
         if(categoryRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Category already exists: " + request.getName());
+            throw new DuplicateResourceException("Category already exists: " + request.getName());
         }
 
         Category category = Category.builder()
@@ -47,7 +49,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         categoryRepository.delete(category);
         log.info("Deleted Category: {}", category.getName());
     }

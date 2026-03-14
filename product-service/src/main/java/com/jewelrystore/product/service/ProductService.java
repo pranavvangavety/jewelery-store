@@ -2,6 +2,9 @@ package com.jewelrystore.product.service;
 
 import com.jewelrystore.product.dto.*;
 import com.jewelrystore.product.entity.*;
+import com.jewelrystore.product.exception.DuplicateResourceException;
+import com.jewelrystore.product.exception.InvalidOperationException;
+import com.jewelrystore.product.exception.ResourceNotFoundException;
 import com.jewelrystore.product.repository.CategoryRepository;
 import com.jewelrystore.product.repository.ProductImageRepository;
 import com.jewelrystore.product.repository.ProductRepository;
@@ -26,11 +29,11 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
         for (ProductVariantRequest variantRequest : request.getVariants()) {
             if(productVariantRepository.existsBySku(variantRequest.getSku())){
-                throw new RuntimeException("SKU already exists: " + variantRequest.getSku());
+                throw new DuplicateResourceException("SKU already exists: " + variantRequest.getSku());
             }
         }
 
@@ -79,7 +82,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findByIdAndStatus(id, ProductStatus.ACTIVE)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return mapToResponse(product);
     }
 
@@ -87,9 +90,9 @@ public class ProductService {
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -105,7 +108,7 @@ public class ProductService {
     @Transactional
     public ProductResponse updateStatus(Long id, ProductStatus status) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
         product.setStatus(status);
         productRepository.save(product);
@@ -117,10 +120,10 @@ public class ProductService {
     @Transactional
     public ProductResponse addVariant(Long productId, ProductVariantRequest request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
         if(productVariantRepository.existsBySku(request.getSku())) {
-            throw new RuntimeException("SKU already exists: " + request.getSku());
+            throw new ResourceNotFoundException("SKU already exists: " + request.getSku());
         }
 
         ProductVariant variant = ProductVariant.builder()
@@ -140,15 +143,15 @@ public class ProductService {
     @Transactional
     public void deleteVariant(Long productId, Long variantId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
         ProductVariant variant = product.getVariants().stream()
                 .filter(v -> v.getId().equals(variantId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Variant not found with id: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Variant not found with id: " + variantId));
 
         if (product.getVariants().size() == 1) {
-            throw new RuntimeException("Cannot delete the only variant of a product");
+            throw new InvalidOperationException("Cannot delete the only variant of a product");
         }
 
         product.getVariants().remove(variant);
@@ -160,12 +163,12 @@ public class ProductService {
     @Transactional
     public ProductResponse addImage(Long productId, ProductImageRequest request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
         ProductVariant variant = product.getVariants().stream()
                 .filter(v -> v.getId().equals(request.getVariantId()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Variants not found with id: " + request.getVariantId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Variants not found with id: " + request.getVariantId()));
 
         if(request.isPrimary()) {
             variant.getImages().forEach(i -> i.setPrimary(false));
@@ -190,12 +193,12 @@ public class ProductService {
     @Transactional
     public ProductResponse deleteImage(Long productId, Long imageId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
         ProductVariant variant = product.getVariants().stream()
                 .filter(v -> v.getImages().stream().anyMatch(i -> i.getId().equals(imageId)))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Image not found with id: " + imageId));
+                .orElseThrow(() -> new ResourceNotFoundException("Image not found with id: " + imageId));
 
         ProductImage image = variant.getImages().stream()
                 .filter(i -> i.getId().equals(imageId))
@@ -257,7 +260,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductVariantResponse getVariantDetails(Long variantId) {
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new RuntimeException("Variant not found with id: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Variant not found with id: " + variantId));
 
         ProductImageResponse primaryImage = variant.getImages().stream()
                 .filter(ProductImage::isPrimary)
