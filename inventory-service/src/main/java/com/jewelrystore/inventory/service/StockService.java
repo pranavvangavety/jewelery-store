@@ -4,6 +4,10 @@ import com.jewelrystore.inventory.dto.ReservationRequest;
 import com.jewelrystore.inventory.dto.StockRequest;
 import com.jewelrystore.inventory.dto.StockResponse;
 import com.jewelrystore.inventory.entity.Stock;
+import com.jewelrystore.inventory.exception.DuplicateResourceException;
+import com.jewelrystore.inventory.exception.InsufficientStockException;
+import com.jewelrystore.inventory.exception.InvalidOperationException;
+import com.jewelrystore.inventory.exception.ResourceNotFoundException;
 import com.jewelrystore.inventory.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +26,7 @@ public class StockService {
     @Transactional
     public StockResponse createStock(StockRequest request) {
         if(stockRepository.existsByVariantId(request.getVariantId())) {
-            throw new RuntimeException("Stock already exists for variantId: " + request.getVariantId());
+            throw new DuplicateResourceException("Stock already exists for variantId: " + request.getVariantId());
         }
 
         Stock stock  = Stock.builder()
@@ -40,7 +44,7 @@ public class StockService {
     @Transactional
     public StockResponse updateStock(Long variantId, StockRequest request) {
         Stock stock = stockRepository.findByVariantId(variantId)
-                .orElseThrow(() -> new RuntimeException("Stock not found for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         stock.setQuantity(request.getQuantity());
         stockRepository.save(stock);
@@ -51,7 +55,7 @@ public class StockService {
     @Transactional(readOnly = true)
     public StockResponse getStock(Long variantId) {
         Stock stock = stockRepository.findByVariantId(variantId)
-                .orElseThrow(() -> new RuntimeException("Stock not found for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
         return mapToResponse(stock);
     }
 
@@ -65,11 +69,11 @@ public class StockService {
     @Transactional
     public StockResponse reserve(Long variantId, ReservationRequest request) {
         Stock stock = stockRepository.findByVariantId(variantId)
-                .orElseThrow(() -> new RuntimeException("Stock not found for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         int available = stock.getQuantity() - stock.getReservedQuantity();
         if(available< request.getQuantity()) {
-            throw new RuntimeException("Insufficient stock for variantId: " + variantId);
+            throw new InsufficientStockException("Insufficient stock for variantId: " + variantId);
         }
 
         stock.setReservedQuantity(stock.getReservedQuantity() + request.getQuantity());
@@ -81,11 +85,11 @@ public class StockService {
     @Transactional
     public StockResponse release(Long variantId, ReservationRequest request) {
         Stock stock = stockRepository.findByVariantId(variantId)
-                .orElseThrow(() -> new RuntimeException("Stock not found for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         int newReserved = stock.getReservedQuantity()  - request.getQuantity();
         if(newReserved<0) {
-            throw new RuntimeException("Cannot release more than reserved stock for variantId: " + variantId);
+            throw new InvalidOperationException("Cannot release more than reserved stock for variantId: " + variantId);
         }
 
         stock.setReservedQuantity(newReserved);
@@ -97,10 +101,10 @@ public class StockService {
     @Transactional
     public StockResponse confirm(Long variantId, ReservationRequest request) {
         Stock stock = stockRepository.findByVariantId(variantId)
-                .orElseThrow(() -> new RuntimeException("Stock not found for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         if(stock.getReservedQuantity() < request.getQuantity()) {
-            throw new RuntimeException("Cannot confirm more than reserved stock for variantId: " + variantId);
+            throw new InvalidOperationException("Cannot confirm more than reserved stock for variantId: " + variantId);
         }
 
         stock.setQuantity(stock.getQuantity() - request.getQuantity());
