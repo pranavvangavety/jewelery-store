@@ -6,6 +6,8 @@ import com.jewelrystore.auth.dto.RegisterRequest;
 import com.jewelrystore.auth.entity.Role;
 import com.jewelrystore.auth.entity.User;
 import com.jewelrystore.auth.event.UserRegisteredEvent;
+import com.jewelrystore.auth.exception.DuplicateResourceException;
+import com.jewelrystore.auth.exception.ResourceNotFoundException;
 import com.jewelrystore.auth.repository.UserRepository;
 import com.jewelrystore.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,8 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if(userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+//            throw new RuntimeException("Email already in use");
+            throw new DuplicateResourceException("Email already in use");
         }
 
         User user = User.builder()
@@ -60,7 +63,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow( () -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid password");
