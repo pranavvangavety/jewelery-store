@@ -7,6 +7,7 @@ import com.jewelrystore.user.dto.UserProfileResponse;
 import com.jewelrystore.user.entity.Address;
 import com.jewelrystore.user.entity.UserProfile;
 import com.jewelrystore.user.event.UserRegisteredEvent;
+import com.jewelrystore.user.exception.ResourceNotFoundException;
 import com.jewelrystore.user.repository.AddressRepository;
 import com.jewelrystore.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class UserService {
     @Transactional
     public UserProfileResponse getProfileByAuthId(Long authId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for authId: " + authId));
 
         return mapToResponse(profile);
     }
@@ -57,7 +58,7 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateProfile(Long authId, UpdateProfileRequest request) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for authId: " + authId));
 
         if(request.getFirstName() != null) {
             profile.setFirstName(request.getFirstName());
@@ -100,7 +101,7 @@ public class UserService {
     @Transactional
     public AddressResponse addAddress(Long authId, AddressRequest request) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for authId: " + authId));
 
         if(request.isDefaultAddress()) {
             profile.getAddresses().forEach(a -> a.setDefaultAddress(false));
@@ -133,12 +134,12 @@ public class UserService {
     @Transactional
     public void deleteAddress(Long authId, Long addressId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
-                .orElseThrow(() -> new RuntimeException("Profile not found for authId: " + authId));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for authId: " + authId));
 
         Address toDelete = profile.getAddresses().stream()
                         .filter(a -> a.getId().equals(addressId))
                                 .findFirst()
-                                        .orElseThrow(() -> new RuntimeException("Addresss not found with id: " + addressId));
+                                        .orElseThrow(() -> new ResourceNotFoundException("Addresss not found with id: " + addressId));
 
         boolean wasDefault = toDelete.isDefaultAddress();
         profile.getAddresses().remove(toDelete);
@@ -153,14 +154,14 @@ public class UserService {
     @Transactional
     public UserProfileResponse setDefaultAddress(Long authId, Long addressId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
-                .orElseThrow(() -> new RuntimeException("Profile not found with authId: " + authId));
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with authId: " + authId));
 
         boolean found = profile.getAddresses().stream()
                 .anyMatch(a -> a.getId().equals(addressId));
 
 
         if(!found) {
-            throw new RuntimeException("Address not found with id: " + addressId);
+            throw new ResourceNotFoundException("Address not found with id: " + addressId);
         }
 
         profile.getAddresses().forEach(a -> a.setDefaultAddress(a.getId().equals(addressId)));
@@ -172,7 +173,7 @@ public class UserService {
     @Transactional
     public AddressResponse getAddressById(Long addressId) {
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new RuntimeException("Address not found: " + addressId));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + addressId));
 
         return AddressResponse.builder()
                 .id(address.getId())
