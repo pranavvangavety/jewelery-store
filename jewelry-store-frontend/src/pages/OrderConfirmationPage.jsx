@@ -16,7 +16,7 @@ export default function OrderConfirmationPage() {
                 const response = await getOrderById(orderId)
                 setOrder(response.data)
             } catch (err) {
-                setError('Failed to load order')
+                setError(err.response?.data?.message || 'Failed to load order')
             } finally {
                 setLoading(false)
             }

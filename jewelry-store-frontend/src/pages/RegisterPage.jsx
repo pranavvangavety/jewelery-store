@@ -25,7 +25,7 @@ export default function RegisterPage() {
             setCurrentUser(response.data)
             navigate('/')
         } catch (err) {
-            setError('Unable to create account')
+            setError(err.response?.data?.message || 'Unable to create account')
         } finally {
             setLoading(false)
         }

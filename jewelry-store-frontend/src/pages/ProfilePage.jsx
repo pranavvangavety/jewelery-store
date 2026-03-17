@@ -66,7 +66,7 @@ export default function ProfilePage() {
             setProfileSuccess(true)
             setTimeout(() => setProfileSuccess(false), 3000)
         } catch (err) {
-            setProfileError('Failed to update profile. Please try again.')
+            setProfileError(err.response?.data?.message || 'Failed to update profile. Please try again.')
         } finally {
             setProfileLoading(false)
         }
@@ -89,7 +89,7 @@ export default function ProfilePage() {
             setShowAddressForm(false)
             await fetchProfile()
         } catch (err) {
-            setAddressError('Failed to add address.')
+            setAddressError(err.response?.data?.message || 'Failed to add address.')
         } finally {
             setAddressLoading(false)
         }

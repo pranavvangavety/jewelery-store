@@ -105,7 +105,7 @@ export default function CheckoutPage() {
             setCartCount(0)
             navigate(`/orders/confirmation/${response.data.id}`)
         } catch (err) {
-            setError('Failed to place order. Please try again.')
+            setError(err.response?.data?.message || 'Failed to place order. Please try again.')
         } finally {
             setLoading(false)
         }

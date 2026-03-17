@@ -271,3 +271,12 @@
     width: 100%;
     text-align: center;
 }
+
+.cart-action-error {
+    color: #c0392b;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 16px;
+}

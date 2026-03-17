@@ -16,6 +16,7 @@ export default function ProductDetailsPage() {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0)
     const [quantity, setQuantity] = useState(1)
     const [cartStatus, setCartStatus] = useState(null)
+    const [cartError, setCartError] = useState(null)
 
     const { setCartCount } = useAuth()
 
@@ -26,7 +27,7 @@ export default function ProductDetailsPage() {
                 setProduct(response.data)
                 setSelectedVariant(response.data.variants[0] ?? null)
             } catch (err) {
-                setError('Failed to load product')
+                setError(err.response?.data?.message ||'Failed to load product')
             } finally {
                 setLoading(false)
             }
@@ -47,6 +48,7 @@ export default function ProductDetailsPage() {
             setCartStatus('success')
         } catch (err) {
             setCartStatus('error')
+            setCartError(err.response?.data?.message || 'Failed to add to cart')
         }
     }
 
@@ -136,7 +138,7 @@ export default function ProductDetailsPage() {
                     <div className="pdp-cart-success">Added to your cart</div>
                 )}
                 {cartStatus === 'error' && (
-                    <div className="pdp-cart-error">Failed to add to cart. Try again.</div>
+                    <div className="pdp-cart-error">{cartError || 'Failed to add to cart. Try again.'}</div>
                 )}
             </div>
         </div>

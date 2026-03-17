@@ -20,7 +20,7 @@ export default function ProductsPage() {
                 const response = await getAllProducts(categoryId)
                 setProducts(response.data)
             } catch (err) {
-                setError('Failed to load products')
+                setError(err.response?.data?.message || 'Failed to load products')
             } finally {
                 setLoading(false)
             }

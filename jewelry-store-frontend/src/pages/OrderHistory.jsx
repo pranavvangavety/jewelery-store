@@ -31,7 +31,7 @@ export default function OrderHistoryPage() {
                 const response = await getOrdersByUser()
                 setOrders(response.data)
             } catch (err) {
-                setError('Failed to load orders')
+                setError(err.response?.data?.message || 'Failed to load orders')
             } finally {
                 setLoading(false)
             }

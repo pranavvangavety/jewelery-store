@@ -10,6 +10,7 @@ export default function CartPage(){
     const [error, setError] = useState(null)
     const navigate = useNavigate()
     const { setCartCount } = useAuth()
+    const [actionError, setActionError] = useState(null)
 
     const fetchCart =  async() => {
         try{
@@ -17,7 +18,7 @@ export default function CartPage(){
             setCart(response.data)
             setCartCount(response.data.totalItems)
         } catch (err) {
-            setError('Failed to load cart')
+            setError(err.response?.data?.message || 'Failed to load cart')
         } finally{
             setLoading(false)
         }
@@ -34,7 +35,8 @@ export default function CartPage(){
             setCart(response.data)
             setCartCount(response.data.totalItems)
         } catch(err) {
-            alert('Failed to update quantity')
+            // alert('Failed to update quantity')
+            setActionError(err.response?.data?.message || 'Failed to update quantity')
         }
     }
 
@@ -44,7 +46,8 @@ export default function CartPage(){
             setCart(response.data)
             setCartCount(response.data.totalItems)
         } catch (err) {
-            alert('Failed to remove item')
+            // alert('Failed to remove item')
+            setActionError(err.response?.data?.message || 'Failed to remove item')
         }
     }
 
@@ -59,6 +62,7 @@ export default function CartPage(){
                 <h1 className="cart-title">Your Cart</h1>
                 <p className="cart-count">{cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}</p>
             </div>
+            {actionError && <p className="cart-action-error">{actionError}</p>}
 
             <div className="cart-items">
                 {cart.items.map(item => (
