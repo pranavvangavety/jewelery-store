@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jewelrystore.cart.dto.*;
 import com.jewelrystore.cart.dto.client.InventoryResponse;
 import com.jewelrystore.cart.dto.client.ProductVariantResponse;
+import com.jewelrystore.cart.exception.InsufficientStockException;
+import com.jewelrystore.cart.exception.ResourceNotFoundException;
 import com.jewelrystore.cart.model.Cart;
 import com.jewelrystore.cart.model.CartItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisInvalidSubscriptionException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -58,7 +61,7 @@ public class CartService {
         InventoryResponse inventory = getInventory(request.getVariantId());
 
         if(inventory == null) {
-            throw new RuntimeException("Insufficient stock for variantId: " + request.getVariantId());
+            throw new InsufficientStockException("Insufficient stock for variantId: " + request.getVariantId());
         }
 
         Cart cart = getCartFromRedis(cartKey);
@@ -76,7 +79,7 @@ public class CartService {
         int existingQuantity = existingItem != null ? existingItem.getQuantity() : 0;
 
         if(existingQuantity + request.getQuantity() > inventory.getAvailableQuantity()) {
-            throw new RuntimeException("Insufficient stock for variantId: " + request.getVariantId());
+            throw new InsufficientStockException("Insufficient stock for variantId: " + request.getVariantId());
         }
 
         ProductVariantResponse variant = productClient.get()
@@ -85,7 +88,7 @@ public class CartService {
                 .body(ProductVariantResponse.class);
 
         if(variant == null){
-            throw new RuntimeException("Product not found for variantId: " +  request.getVariantId());
+            throw new ResourceNotFoundException("Product not found for variantId: " +  request.getVariantId());
         }
 
 
@@ -115,17 +118,17 @@ public class CartService {
     public CartResponse updateItem(String cartKey, Long variantId, UpdateItemRequest request) {
         Cart cart = getCartFromRedis(cartKey);
         if(cart == null) {
-            throw new RuntimeException("Cart not found for key: " + cartKey);
+            throw new ResourceNotFoundException("Cart not found for key: " + cartKey);
         }
 
         CartItem item = cart.getItems().stream()
                 .filter(i -> i.getVariantId().equals(variantId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Item not found in cart for variantId: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Item not found in cart for variantId: " + variantId));
 
         InventoryResponse inventory = getInventory(variantId);
         if(inventory == null || request.getQuantity() > inventory.getAvailableQuantity()) {
-            throw new RuntimeException("Insufficient stock for variantId: " + variantId);
+            throw new InsufficientStockException("Insufficient stock for variantId: " + variantId);
         }
         item.setQuantity(request.getQuantity());
         saveCartToRedis(cart, cartKey);
@@ -136,7 +139,7 @@ public class CartService {
     public CartResponse removeItem(String cartKey, Long variantId) {
         Cart cart = getCartFromRedis(cartKey);
         if(cart == null) {
-            throw new RuntimeException("Cart not found for key: " + cartKey);
+            throw new ResourceNotFoundException("Cart not found for key: " + cartKey);
         }
 
         cart.getItems().removeIf(i -> i.getVariantId().equals(variantId));
