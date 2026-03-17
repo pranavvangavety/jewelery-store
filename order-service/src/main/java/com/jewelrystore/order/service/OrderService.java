@@ -3,6 +3,8 @@ package com.jewelrystore.order.service;
 import com.jewelrystore.order.dto.*;
 import com.jewelrystore.order.dto.client.*;
 import com.jewelrystore.order.entity.*;
+import com.jewelrystore.order.exception.InvalidOperationException;
+import com.jewelrystore.order.exception.ResourceNotFoundException;
 import com.jewelrystore.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +44,7 @@ public class OrderService {
         CartResponse cart = fetchCart(userId, sessionId);
 
         if (cart == null || cart.getItems().isEmpty()) {
-            throw new RuntimeException("Cart is empty or not found");
+            throw new ResourceNotFoundException("Cart is empty or not found");
         }
 
         String street, city, state, zipCode, country;
@@ -54,7 +56,7 @@ public class OrderService {
                     .body(AddressResponse.class);
 
             if (address == null) {
-                throw new RuntimeException("Address not found: " + request.getAddressId());
+                throw new ResourceNotFoundException("Address not found: " + request.getAddressId());
             }
 
             street = address.getStreet();
@@ -164,7 +166,7 @@ public class OrderService {
 
     public OrderResponse getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
         return mapToResponse(order);
     }
 
@@ -187,7 +189,7 @@ public class OrderService {
                     .retrieve()
                     .body(CartResponse.class);
         } else {
-            throw new RuntimeException("No identity provided - supply X-User-Id or X-Session-Id");
+            throw new InvalidOperationException("No identity provided - supply X-User-Id or X-Session-Id");
         }
     }
 
