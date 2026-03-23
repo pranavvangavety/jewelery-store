@@ -80,10 +80,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                     .getPayload();
 
             String userId = claims.get("userId", Long.class).toString();
-            log.info("Extracted userId: {}, forwarding X-User-Id header", userId);
+            String role = claims.get("role", String.class);
+            log.info("Extracted userId: {}, role: {}, forwarding headers", userId, role);
 
             ServerWebExchange modifiedExchange = exchange.mutate()
-                    .request(r -> r.header("X-User-Id", userId))
+                    .request(r -> r.header("X-User-Id", userId).header("X-User_Role", role))
                     .build();
 
             return chain.filter(modifiedExchange);
