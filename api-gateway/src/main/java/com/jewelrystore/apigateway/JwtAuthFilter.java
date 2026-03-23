@@ -84,7 +84,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             log.info("Extracted userId: {}, role: {}, forwarding headers", userId, role);
 
             ServerWebExchange modifiedExchange = exchange.mutate()
-                    .request(r -> r.header("X-User-Id", userId).header("X-User_Role", role))
+                    .request(r -> r.header("X-User-Id", userId).header("X-User-Role", role))
                     .build();
 
             return chain.filter(modifiedExchange);
