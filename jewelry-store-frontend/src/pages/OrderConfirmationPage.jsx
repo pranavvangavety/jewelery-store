@@ -34,6 +34,13 @@ export default function OrderConfirmationPage() {
                 <div className="ocp-check">✦</div>
                 <h1 className="ocp-title">Order Confirmed</h1>
                 <p className="ocp-order-number">Order #{order.id}</p>
+                <p className="ocp-order-date">
+                    {new Date(order.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    })} at {new Date(order.createdAt).toLocaleTimeString('en-US', {
+                    hour: '2-digit', minute: '2-digit'
+                })}
+                </p>
                 <div className="ocp-badges">
                     <span className="ocp-badge gold">{order.orderStatus}</span>
                     <span className="ocp-badge gold">{order.paymentStatus}</span>

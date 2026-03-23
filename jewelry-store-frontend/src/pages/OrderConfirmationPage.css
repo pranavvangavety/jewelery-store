@@ -35,6 +35,15 @@
     margin-bottom: 20px;
 }
 
+.ocp-order-date {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+    margin-bottom: 15px;
+}
+
 .ocp-badges {
     display: flex;
     justify-content: center;
