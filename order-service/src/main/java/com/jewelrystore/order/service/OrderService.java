@@ -171,7 +171,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> getOrdersByUser(Long userId) {
-        return orderRepository.findByUserId(userId)
+        return orderRepository.findByIdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToResponse).toList();
     }
 
