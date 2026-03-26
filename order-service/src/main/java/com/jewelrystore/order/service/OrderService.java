@@ -170,6 +170,10 @@ public class OrderService {
         return mapToResponse(order);
     }
 
+    public List<OrderResponse> getAllOrders() {
+        return orderRepository.findAllByOrderByCreatedAtDesc().stream().map(this::mapToResponse).toList();
+    }
+
     public List<OrderResponse> getOrdersByUser(Long userId) {
         return orderRepository.findByIdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToResponse).toList();

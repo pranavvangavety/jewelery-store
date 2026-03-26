@@ -30,6 +30,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(orderId));
     }
 
+    @GetMapping("/all") //ADMIN
+    public ResponseEntity<List<OrderResponse>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
     @GetMapping("/history")
     public ResponseEntity<List<OrderResponse>> getOrdersByUser(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));
