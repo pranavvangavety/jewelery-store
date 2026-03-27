@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext.jsx"
 import { Link, useNavigate } from "react-router-dom"
 import { loginUser } from "../api/authApi.js"
@@ -12,8 +12,14 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
-    const { setCurrentUser,sessionId, setCartCount } = useAuth()
+    const { setCurrentUser,sessionId, setCartCount, user } = useAuth()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (user) {
+            user.role === 'ADMIN' ? navigate('/admin') : navigate('/')
+        }
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -28,7 +34,7 @@ export default function LoginPage() {
             } catch (err) {
                 // nothing?
             }
-            navigate('/')
+            response.data.role === 'ADMIN' ? navigate('/admin') : navigate('/')
         } catch (err) {
             setError('Invalid email or password')
         } finally {
