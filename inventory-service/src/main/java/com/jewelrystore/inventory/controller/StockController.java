@@ -33,6 +33,11 @@ public class StockController {
         return ResponseEntity.ok(stockService.getStock(variantId));
     }
 
+    @GetMapping // ADMIN
+    public ResponseEntity<List<StockResponse>> getAllStock() {
+        return ResponseEntity.ok(stockService.getAllStock());
+    }
+
     @GetMapping("/batch")
     public ResponseEntity<List<StockResponse>> getBatchStock(@RequestParam List<Long> variantIds) {
         return ResponseEntity.ok(stockService.getBatchStock(variantIds));
