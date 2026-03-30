@@ -15,10 +15,8 @@ export const adminDeleteCategory = (id) =>
 
 // Products
 
-export const adminGetAllProducts = (categoryId) => {
-    const params = categoryId ? { categoryId } : {}
-    return axiosInstance.get('/products', { params })
-}
+export const adminGetAllProducts = () =>
+    axiosInstance.get('/products/all')
 
 export const adminGetProductById = (id) =>
     axiosInstance.get(`/products/${id}`)

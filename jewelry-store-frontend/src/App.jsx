@@ -13,7 +13,8 @@ import HomePage from "./pages/HomePage.jsx"
 import ProfilePage from "./pages/ProfilePage.jsx"
 import AdminRoute from "./components/AdminRoute.jsx"
 import AdminLayout from "./admin/layout/AdminLayout.jsx"
-import DashboardPage from './admin/pages/DashboardPage.jsx'
+import DashboardPage from "./admin/pages/DashboardPage.jsx"
+import CataloguePage from "./admin/pages/CataloguePage.jsx";
 
 function App() {
     return (
@@ -38,8 +39,7 @@ function App() {
                     </AdminRoute>
                 }>
                     <Route index element={<DashboardPage />} />
-                    <Route path="products" element={<div>Products (coming soon)</div>} />
-                    <Route path="categories" element={<div>Categories (coming soon)</div>} />
+                    <Route path="catalogue" element={<CataloguePage />} />
                     <Route path="inventory" element={<div>Inventory (coming soon)</div>} />
                     <Route path="orders" element={<div>Orders (coming soon)</div>} />
                 </Route>
