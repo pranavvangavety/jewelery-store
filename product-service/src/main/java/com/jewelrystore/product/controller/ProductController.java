@@ -54,6 +54,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllActiveProducts());
     }
 
+    @GetMapping("/products/all") // ADMIN
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
+
     @GetMapping("/products/{id}")
     public ResponseEntity<ProductResponse> getProductsById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));

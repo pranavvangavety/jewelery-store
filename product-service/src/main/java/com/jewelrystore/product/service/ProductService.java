@@ -71,6 +71,13 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getAllProducts() {
+        return productRepository.findAll()
+                .stream().map(this::mapToResponse)
+                .toList();
+    }
+
 
     @Transactional(readOnly = true)
     public List<ProductResponse> getProductByCategory(Long categoryId) {
