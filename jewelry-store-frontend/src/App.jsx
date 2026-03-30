@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage.jsx"
 import ProfilePage from "./pages/ProfilePage.jsx"
 import AdminRoute from "./components/AdminRoute.jsx"
 import AdminLayout from "./admin/layout/AdminLayout.jsx"
+import DashboardPage from './admin/pages/DashboardPage.jsx'
 
 function App() {
     return (
@@ -36,7 +37,7 @@ function App() {
                         <AdminLayout />
                     </AdminRoute>
                 }>
-                    <Route index element={<div>Dashboard (coming soon)</div>} />
+                    <Route index element={<DashboardPage />} />
                     <Route path="products" element={<div>Products (coming soon)</div>} />
                     <Route path="categories" element={<div>Categories (coming soon)</div>} />
                     <Route path="inventory" element={<div>Inventory (coming soon)</div>} />
