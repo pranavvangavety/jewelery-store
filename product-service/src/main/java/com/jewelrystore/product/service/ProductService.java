@@ -93,6 +93,13 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional(readOnly = true)
+    public ProductResponse getProductByIdAdmin(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        return mapToResponse(product);
+    }
+
 
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {

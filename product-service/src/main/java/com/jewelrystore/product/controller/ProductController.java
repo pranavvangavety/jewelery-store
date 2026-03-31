@@ -64,6 +64,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
+    @GetMapping("/products/all/{id}") // ADMIN
+    public ResponseEntity<ProductResponse> getProductByIdAdmin(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductByIdAdmin(id));
+    }
+
     @PutMapping("/products/{id}") //ADMIN
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.updateProduct(id, request));
@@ -80,6 +85,7 @@ public class ProductController {
     public ResponseEntity<ProductResponse> addVariant(@PathVariable Long id, @Valid @RequestBody ProductVariantRequest request) {
         return ResponseEntity.ok(productService.addVariant(id, request));
     }
+
 
     @DeleteMapping("/products/{id}/variants/{variantId}") // ADMIN
     public ResponseEntity<Void> deleteVariant(@PathVariable Long id, @PathVariable Long variantId) {
