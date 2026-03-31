@@ -54,6 +54,8 @@ export const adminAddImage = (productId, data) =>
 export const adminDeleteImage = (productId, imageId) =>
     axiosInstance.delete(`/products/${productId}/images/${imageId}`)
 
+export const adminSetPrimaryImage = (productId, imageId) =>
+    axiosInstance.patch(`/products/${productId}/images/${imageId}/primary`)
 
 
 // INVENTORY

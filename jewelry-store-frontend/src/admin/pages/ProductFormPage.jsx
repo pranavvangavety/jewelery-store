@@ -8,7 +8,7 @@ import {
     adminAddVariant,
     adminDeleteVariant,
     adminAddImage,
-    adminDeleteImage, adminUpdateVariant,
+    adminDeleteImage, adminUpdateVariant, adminSetPrimaryImage,
 } from '../../api/adminApi.js'
 import './ProductFormPage.css'
 
@@ -60,6 +60,7 @@ export default function ProductFormPage() {
                         categoryId:  String(p.category.id),
                     })
                     setExistingVariants(p.variants || [])
+                    setNewVariants([])
                 }
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to load product.')
@@ -186,6 +187,38 @@ export default function ProductFormPage() {
             })))
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to delete image.')
+        }
+    }
+
+    async function handleUpdateExistingImage(variantId, imageId, newUrl, altText, wasPrimary, displayOrder) {
+        if (!newUrl) return
+        try {
+            await adminDeleteImage(savedProductId, imageId)
+            const res = await adminAddImage(savedProductId, {
+                variantId,
+                url:          newUrl,
+                altText:      altText || '',
+                displayOrder,
+                primary:      wasPrimary,
+            })
+            const updatedVariant = res.data.variants.find(v => v.id === variantId)
+            setExistingVariants(prev => prev.map(v =>
+                v.id === variantId ? { ...updatedVariant, _newImages: v._newImages } : v
+            ))
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update image.')
+        }
+    }
+
+    async function handleSetPrimaryImage(variantId, imageId) {
+        try {
+            const res = await adminSetPrimaryImage(savedProductId, imageId)
+            const updatedVariant = res.data.variants.find(v => v.id === variantId)
+            setExistingVariants(prev => prev.map(v =>
+                v.id === variantId ? { ...updatedVariant, _newImages: v._newImages } : v
+            ))
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to set primary image.')
         }
     }
 
@@ -443,14 +476,45 @@ export default function ProductFormPage() {
                                         </div>
                                     </div>
 
+                                    {!v.color && !v.size && (
+                                        <p className="pf-field-hint">At least one of color or size is required</p>
+                                    )}
+
                                     <div className="pf-images-section">
                                         <p className="pf-images-label">Images</p>
                                         {v.images?.map(img => (
                                             <div key={img.id} className="pf-existing-image-row">
-                                                <span className="pf-existing-url" title={img.url}>
-                                                    {img.url.length > 50 ? img.url.slice(0, 50) + '…' : img.url}
-                                                </span>
-                                                {img.primary && <span className="pf-primary-badge">Primary</span>}
+                                                <input
+                                                    className="pf-input pf-input--url"
+                                                    defaultValue={img.url}
+                                                    onBlur={e => {
+                                                        if (e.target.value !== img.url) {
+                                                            handleUpdateExistingImage(v.id, img.id, e.target.value, img.altText, img.primary, img.displayOrder)
+                                                        }
+                                                    }}
+                                                    placeholder="Image URL"
+                                                />
+                                                <input
+                                                    className="pf-input pf-input--alt"
+                                                    defaultValue={img.altText || ''}
+                                                    onBlur={e => {
+                                                        if (e.target.value !== (img.altText || '')) {
+                                                            handleUpdateExistingImage(v.id, img.id, img.url, e.target.value, img.primary, img.displayOrder)
+                                                        }
+                                                    }}
+                                                    placeholder="Alt text"
+                                                />
+                                                {img.primary
+                                                    ? <span className="pf-primary-badge">Primary</span>
+                                                    : v.images.length > 1 && (
+                                                    <button
+                                                        className="pf-set-primary-btn"
+                                                        onClick={() => handleSetPrimaryImage(v.id, img.id)}
+                                                    >
+                                                        Set Primary
+                                                    </button>
+                                                )
+                                                }
                                                 <button
                                                     className="pf-delete-btn"
                                                     onClick={() => handleDeleteExistingImage(img.id)}
@@ -505,11 +569,13 @@ export default function ProductFormPage() {
                         </div>
                     )}
 
-                    <p className="pf-existing-label">
-                        {isEdit ? 'Add New Variants' : 'Variants'}
-                    </p>
+                    {(newVariants.length > 0) && (
+                        <>
+                        <p className="pf-existing-label">
+                            {isEdit ? 'Add New Variants' : 'Variants'}
+                        </p>
 
-                    {newVariants.map((variant, vi) => (
+                        {newVariants.map((variant, vi) => (
                         <div key={vi} className="pf-variant-block">
                             <div className="pf-variant-block-header">
                                 <span className="pf-variant-block-title">Variant {vi + 1}</span>
@@ -568,6 +634,10 @@ export default function ProductFormPage() {
                                 </div>
                             </div>
 
+                            {!v.color && !v.size && (
+                                <p className="pf-field-hint">At least one of color or size is required</p>
+                            )}
+
                             <div className="pf-images-section">
                                 <p className="pf-images-label">Images</p>
                                 {variant.images.map((img, ii) => (
@@ -600,10 +670,13 @@ export default function ProductFormPage() {
                                 </button>
                             </div>
                         </div>
-                    ))}
+                        ))}
+                        </>
+                    )}
+
 
                     <button className="pf-add-variant-btn" onClick={addVariantRow}>
-                        + Add Another Variant
+                        {isEdit && newVariants.length === 0 ? '+ Add New Variant' : '+ Add Another Variant'}
                     </button>
 
                     <div className="pf-actions">
@@ -611,7 +684,7 @@ export default function ProductFormPage() {
                         <button
                             className="pf-btn-primary"
                             onClick={goNext}
-                            disabled={newVariants.some(v => !v.sku || !v.price) && !isEdit}
+                            disabled={newVariants.filter(v => v.sku || v.price).some(v => !v.sku || !v.price || (!v.color && !v.size))}
                         >
                             Next: Review →
                         </button>
@@ -643,19 +716,68 @@ export default function ProductFormPage() {
                         </div>
                     </div>
 
+                    {isEdit && existingVariants.length > 0 && (
+                        <div className="pf-review-section">
+                            <p className="pf-review-heading">Existing Variants</p>
+                            {existingVariants.map(v => (
+                                <div key={v.id} className="pf-review-variant-full">
+                                    <div className="pf-review-variant-header">
+                                        <span className="pf-review-sku">{v.sku}</span>
+                                        <span className="pf-review-meta">
+                                            {[v.color, v.size, `$${Number(v.price).toFixed(2)}`].filter(Boolean).join(' · ')}
+                                        </span>
+                                    </div>
+                                    {v.images?.length > 0 ? (
+                                        <div className="pf-review-images">
+                                            {v.images.map(img => (
+                                                <div key={img.id} className="pf-review-image-item">
+                                                    <img
+                                                        src={img.url}
+                                                        alt={img.altText || v.sku}
+                                                        className="pf-review-thumb"
+                                                    />
+                                                    <p className="pf-review-img-alt">{img.altText || '—'}</p>
+                                                    {img.primary && <span className="pf-primary-badge">Primary</span>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="pf-review-empty">No images.</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     <div className="pf-review-section">
                         <p className="pf-review-heading">
                             {isEdit ? 'New Variants to Add' : 'Variants'}
                         </p>
                         {newVariants.filter(v => v.sku).map((v, i) => (
-                            <div key={i} className="pf-review-variant">
-                                <span className="pf-review-sku">{v.sku}</span>
-                                <span className="pf-review-meta">
-                                    {[v.color, v.size, `$${v.price}`].filter(Boolean).join(' · ')}
-                                </span>
-                                <span className="pf-review-meta">
-                                    {v.images.filter(img => img.url).length} image(s)
-                                </span>
+                            <div key={i} className="pf-review-variant-full">
+                                <div className="pf-review-variant-header">
+                                    <span className="pf-review-sku">{v.sku}</span>
+                                    <span className="pf-review-meta">
+                                        {[v.color, v.size, `$${v.price}`].filter(Boolean).join(' · ')}
+                                    </span>
+                                </div>
+                                {v.images.filter(img => img.url).length > 0 ? (
+                                    <div className="pf-review-images">
+                                        {v.images.filter(img => img.url).map((img, ii) => (
+                                            <div key={ii} className="pf-review-image-item">
+                                                <img
+                                                    src={img.url}
+                                                    alt={img.altText || v.sku}
+                                                    className="pf-review-thumb"
+                                                />
+                                                <p className="pf-review-img-alt">{img.altText || '—'}</p>
+                                                {ii === 0 && <span className="pf-primary-badge">Primary</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="pf-review-empty">No images added.</p>
+                                )}
                             </div>
                         ))}
                         {newVariants.filter(v => v.sku).length === 0 && (

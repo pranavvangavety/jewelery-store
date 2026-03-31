@@ -107,7 +107,12 @@ export default function ProductDetailsPage() {
                 >
                     {product.variants.map(v => (
                         <option key={v.id} value={v.id}>
-                            {[v.color, v.size].filter(Boolean).join(' / ')} — ${v.price}
+                            {(() => {
+                                const parts = [v.color, v.size].filter(Boolean)
+                                return parts.length > 0
+                                    ? `${parts.join(' / ')} — $${v.price}`
+                                    : `Variant ${product.variants.indexOf(v) + 1} — $${v.price}`
+                            })()}
                         </option>
                     ))}
                 </select>
