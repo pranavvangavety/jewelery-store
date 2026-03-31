@@ -19,7 +19,7 @@ export const adminGetAllProducts = () =>
     axiosInstance.get('/products/all')
 
 export const adminGetProductById = (id) =>
-    axiosInstance.get(`/products/${id}`)
+    axiosInstance.get(`/products/all/${id}`)
 
 export const adminCreateProduct = (data) =>
     axiosInstance.post('/products', data)
@@ -38,6 +38,9 @@ export const adminUpdateProductStatus = (id, status) =>
 export const adminAddVariant = (productId, data) =>
     axiosInstance.post(`/products/${productId}/variants`, data)
 // data: { sku, material, price, additionalInfo }
+
+export const adminUpdateVariant = (productId, variantId, data) =>
+    axiosInstance.put(`/products/${productId}/variants/${variantId}`, data)
 
 export const adminDeleteVariant = (productId, variantId) =>
     axiosInstance.delete(`/products/${productId}/variants/${variantId}`)

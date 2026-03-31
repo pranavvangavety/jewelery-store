@@ -15,6 +15,7 @@ import AdminRoute from "./components/AdminRoute.jsx"
 import AdminLayout from "./admin/layout/AdminLayout.jsx"
 import DashboardPage from "./admin/pages/DashboardPage.jsx"
 import CataloguePage from "./admin/pages/CataloguePage.jsx";
+import ProductFormPage from "./admin/pages/ProductFormPage.jsx";
 
 function App() {
     return (
@@ -40,6 +41,8 @@ function App() {
                 }>
                     <Route index element={<DashboardPage />} />
                     <Route path="catalogue" element={<CataloguePage />} />
+                    <Route path="products/new" element={<ProductFormPage />} />
+                    <Route path="products/:id/edit" element={<ProductFormPage />} />
                     <Route path="inventory" element={<div>Inventory (coming soon)</div>} />
                     <Route path="orders" element={<div>Orders (coming soon)</div>} />
                 </Route>
