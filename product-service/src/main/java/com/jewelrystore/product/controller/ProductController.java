@@ -86,6 +86,13 @@ public class ProductController {
         return ResponseEntity.ok(productService.addVariant(id, request));
     }
 
+    @PutMapping("/products/{id}/variants/{variantId}") // ADMIN
+    public ResponseEntity<ProductResponse> updateVariant(
+            @PathVariable Long id,
+            @PathVariable Long variantId,
+            @Valid @RequestBody ProductVariantRequest request) {
+        return ResponseEntity.ok(productService.updateVariant(id, variantId, request));
+    }
 
     @DeleteMapping("/products/{id}/variants/{variantId}") // ADMIN
     public ResponseEntity<Void> deleteVariant(@PathVariable Long id, @PathVariable Long variantId) {

@@ -153,6 +153,29 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional
+    public ProductResponse updateVariant(Long productId, Long variantId, ProductVariantRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        ProductVariant variant = product.getVariants().stream()
+                .filter(v -> v.getId().equals(variantId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Variant not found with id: " + variantId));
+
+        if (!variant.getSku().equals(request.getSku()) && productVariantRepository.existsBySku(request.getSku())) {
+            throw new DuplicateResourceException("SKU already exists: " + request.getSku());
+        }
+
+        variant.setSku(request.getSku());
+        variant.setPrice(request.getPrice());
+        variant.setColor(request.getColor());
+        variant.setSize(request.getSize());
+
+        productRepository.save(product);
+        return mapToResponse(product);
+    }
+
 
     @Transactional
     public void deleteVariant(Long productId, Long variantId) {
