@@ -117,4 +117,10 @@ public class ProductController {
     public ResponseEntity<ProductResponse> deleteImage(@PathVariable Long id, @PathVariable Long imageId) {
         return ResponseEntity.ok(productService.deleteImage(id, imageId));
     }
+
+    @PatchMapping("/products/{id}/images/{imageId}/primary") // ADMIN
+    public ResponseEntity<ProductResponse> setPrimaryImage(
+            @PathVariable Long id, @PathVariable Long imageId) {
+        return ResponseEntity.ok(productService.setPrimaryImage(id, imageId));
+    }
 }
