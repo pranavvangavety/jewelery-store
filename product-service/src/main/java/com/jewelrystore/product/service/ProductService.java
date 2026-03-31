@@ -264,6 +264,19 @@ public class ProductService {
         return mapToResponse(product);
     }
 
+    @Transactional
+    public ProductResponse setPrimaryImage(Long productId, Long imageId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        product.getVariants().forEach(variant ->
+                variant.getImages().forEach(img -> img.setPrimary(img.getId().equals(imageId)))
+        );
+
+        productRepository.save(product);
+        return mapToResponse(product);
+    }
+
 
     private ProductResponse mapToResponse(Product product) {
         List<ProductVariantResponse> variants = product.getVariants().stream()
