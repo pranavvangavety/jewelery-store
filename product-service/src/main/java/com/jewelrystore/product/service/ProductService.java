@@ -120,13 +120,23 @@ public class ProductService {
 
 
     @Transactional
-    public ProductResponse updateStatus(Long id, ProductStatus status) {
+    public ProductResponse updateStatus(Long id, ProductStatus newStatus) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
-        product.setStatus(status);
+        if (newStatus == ProductStatus.ACTIVE) {
+            boolean anyVariantMissingImage = product.getVariants().stream()
+                    .anyMatch(v -> v.getImages() == null || v.getImages().isEmpty());
+            if (anyVariantMissingImage) {
+                throw new InvalidOperationException(
+                        "All variants must have at least one image before activating a product"
+                );
+            }
+        }
+
+        product.setStatus(newStatus);
         productRepository.save(product);
-        log.info("Updated status to {} for product: {}", status, product.getStatus());
+        log.info("Updated status from {} to {} for product: {}", product.getStatus(), newStatus, product.getId());
         return mapToResponse(product);
     }
 
