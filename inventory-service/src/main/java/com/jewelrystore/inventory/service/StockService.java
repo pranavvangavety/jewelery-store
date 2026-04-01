@@ -53,6 +53,10 @@ public class StockService {
         return mapToResponse(stock);
     }
 
+    public boolean stockExists(Long variantId){
+        return stockRepository.existsByVariantId(variantId);
+    }
+
     @Transactional(readOnly = true)
     public StockResponse getStock(Long variantId) {
         Stock stock = stockRepository.findByVariantId(variantId)
