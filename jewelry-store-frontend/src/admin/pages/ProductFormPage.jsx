@@ -684,7 +684,11 @@ export default function ProductFormPage() {
                         <button
                             className="pf-btn-primary"
                             onClick={goNext}
-                            disabled={newVariants.filter(v => v.sku || v.price).some(v => !v.sku || !v.price || (!v.color && !v.size))}
+                            disabled={
+                                (!isEdit && !newVariants.some(v => v.sku && v.price && (v.color || v.size)))
+                                ||
+                                (newVariants.some(v => (v.sku || v.price || v.color || v.size) && (!v.sku || !v.price || (!v.color && !v.size))))
+                            }
                         >
                             Next: Review →
                         </button>
