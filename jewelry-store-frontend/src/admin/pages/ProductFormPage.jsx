@@ -634,7 +634,7 @@ export default function ProductFormPage() {
                                 </div>
                             </div>
 
-                            {!v.color && !v.size && (
+                            {!variant.color && !variant.size && (
                                 <p className="pf-field-hint">At least one of color or size is required</p>
                             )}
 
