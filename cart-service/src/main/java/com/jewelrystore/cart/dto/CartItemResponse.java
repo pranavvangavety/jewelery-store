@@ -15,6 +15,7 @@ public class CartItemResponse {
 
     private Long variantId;
     private String productName;
+    private String sku;
     private String color;
     private String size;
     private BigDecimal price;
