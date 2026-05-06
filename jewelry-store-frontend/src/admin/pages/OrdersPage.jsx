@@ -1,0 +1,185 @@
+import { useState, useEffect } from 'react'
+import { adminGetAllOrders } from '../../api/adminApi.js'
+import './OrdersPage.css'
+
+function formatDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+    })
+}
+
+function formatCurrency(amount) {
+    return `$${Number(amount).toFixed(2)}`
+}
+
+const ORDER_STATUS_CLASS = {
+    PENDING_PAYMENT: 'pending',
+    CONFIRMED:       'confirmed',
+    SHIPPED:         'shipped',
+    DELIVERED:       'delivered',
+    CANCELLED:       'cancelled',
+    FAILED:          'failed',
+}
+
+const PAYMENT_STATUS_CLASS = {
+    PENDING: 'pending',
+    PAID:    'paid',
+    FAILED:  'failed',
+}
+
+export default function OrdersPage() {
+    const [orders,  setOrders]  = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error,   setError]   = useState(null)
+    const [expandedId, setExpandedId] = useState(null)
+
+    useEffect(() => {
+        async function fetchOrders() {
+            try {
+                const res = await adminGetAllOrders()
+                const sorted = [...res.data].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                )
+                setOrders(sorted)
+            } catch (err) {
+                setError(err.response?.data?.message || 'Failed to load orders')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchOrders()
+    }, [])
+
+    function toggleExpand(orderId) {
+        setExpandedId(prev => prev === orderId ? null : orderId)
+    }
+
+    return (
+        <div className="ord-page">
+
+            <div className="ord-header">
+                <p className="ord-eyebrow">Order Management</p>
+                <h1 className="ord-title">Orders</h1>
+            </div>
+
+            {loading && <p className="ord-loading">Loading…</p>}
+            {error   && <p className="ord-error">{error}</p>}
+
+            {!loading && !error && (
+                <>
+                    <p className="ord-count">{orders.length} orders</p>
+
+                    <table className="ord-table">
+                        <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Order Status</th>
+                            <th>Payment</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {orders.map(order => {
+                            const isExpanded = expandedId === order.id
+                            return (
+                                <>
+                                    <tr key={order.id} className={isExpanded ? 'ord-row--expanded' : ''}>
+                                        <td className="ord-td-muted">#{order.id}</td>
+                                        <td className="ord-td-name">
+                                            {order.firstName} {order.lastName}
+                                            <span className="ord-td-email">{order.email}</span>
+                                        </td>
+                                        <td className="ord-td-muted">{formatDate(order.createdAt)}</td>
+                                        <td>
+                                                <span className={`ord-badge ord-badge--${ORDER_STATUS_CLASS[order.orderStatus]}`}>
+                                                    {order.orderStatus.replace('_', ' ')}
+                                                </span>
+                                        </td>
+                                        <td>
+                                                <span className={`ord-badge ord-badge--${PAYMENT_STATUS_CLASS[order.paymentStatus]}`}>
+                                                    {order.paymentStatus}
+                                                </span>
+                                        </td>
+                                        <td className="ord-td-total">{formatCurrency(order.totalAmount)}</td>
+                                        <td>
+                                            <button
+                                                className="ord-btn-view"
+                                                onClick={() => toggleExpand(order.id)}
+                                            >
+                                                    <span
+                                                        className="ord-chevron"
+                                                        style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                                    >
+                                                        &#8964;
+                                                    </span>
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    {isExpanded && (
+                                        <tr key={`${order.id}-detail`} className="ord-detail-row">
+                                            <td colSpan={7}>
+                                                <div className="ord-detail">
+
+                                                    <div className="ord-detail-left">
+                                                        <p className="ord-detail-heading">Shipping Address</p>
+                                                        <p className="ord-detail-line">{order.firstName} {order.lastName}</p>
+                                                        <p className="ord-detail-line">{order.shippingStreet}</p>
+                                                        <p className="ord-detail-line">
+                                                            {order.shippingCity}, {order.shippingState} {order.shippingZipCode}
+                                                        </p>
+                                                        <p className="ord-detail-line">{order.shippingCountry}</p>
+                                                        <p className="ord-detail-line">{order.phone}</p>
+
+                                                        {order.transactionId && (
+                                                            <div className="ord-transaction">
+                                                                <p className="ord-detail-heading" style={{ marginTop: '20px' }}>Transaction</p>
+                                                                <p className="ord-detail-line ord-td-muted">{order.transactionId}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="ord-detail-right">
+                                                        <p className="ord-detail-heading">Items</p>
+                                                        <table className="ord-items-table">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Product</th>
+                                                                <th>SKU</th>
+                                                                <th>Qty</th>
+                                                                <th>Unit Price</th>
+                                                                <th>Item Total</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {order.items.map(item => (
+                                                                <tr key={item.variantId}>
+                                                                    <td>{item.productName}</td>
+                                                                    <td className="ord-td-muted">{item.sku}</td>
+                                                                    <td className="ord-td-muted">{item.quantity}</td>
+                                                                    <td className="ord-td-muted">{formatCurrency(item.price)}</td>
+                                                                    <td className="ord-td-muted">{formatCurrency(item.itemTotal)}</td>
+                                                                </tr>
+                                                            ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>
+                            )
+                        })}
+                        </tbody>
+                    </table>
+                </>
+            )}
+
+        </div>
+    )
+}

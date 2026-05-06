@@ -1,0 +1,212 @@
+.ord-page {
+    padding: 48px 48px 64px;
+    max-width: 1200px;
+}
+
+
+
+.ord-header {
+    margin-bottom: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+}
+
+.ord-eyebrow {
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+}
+
+.ord-title {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: var(--cream);
+}
+
+.ord-count {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+
+
+
+.ord-loading,
+.ord-error {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-top: 32px;
+}
+
+.ord-loading { color: var(--muted); }
+.ord-error   { color: #c0392b; }
+
+
+
+.ord-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+.ord-table th {
+    font-size: 0.5rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 12px 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ord-table td {
+    padding: 14px 12px 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--cream);
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.ord-table tr:last-child td { border-bottom: none; }
+
+.ord-row--expanded td {
+    border-bottom: none;
+}
+
+.ord-td-name {
+    font-size: 0.78rem;
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ord-td-email {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+}
+
+.ord-td-muted {
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+.ord-td-total {
+    font-size: 0.78rem;
+    color: var(--cream);
+}
+
+
+
+.ord-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-radius: 2px;
+}
+
+.ord-badge--pending      { background: rgba(201,168,76,0.15);  color: var(--gold); }
+.ord-badge--confirmed    { background: rgba(52,152,219,0.15);  color: #3498db; }
+.ord-badge--shipped      { background: rgba(155,89,182,0.15);  color: #9b59b6; }
+.ord-badge--delivered    { background: rgba(39,174,96,0.15);   color: #27ae60; }
+.ord-badge--cancelled    { background: rgba(192,57,43,0.12);   color: #c0392b; }
+.ord-badge--failed       { background: rgba(192,57,43,0.12);   color: #c0392b; }
+.ord-badge--paid         { background: rgba(39,174,96,0.15);   color: #27ae60; }
+
+
+
+.ord-btn-view {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    color: var(--muted);
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+}
+
+.ord-btn-view:hover { color: var(--gold); }
+
+.ord-chevron {
+    display: inline-block;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+
+
+.ord-detail-row td {
+    padding: 0 0 16px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ord-detail {
+    display: flex;
+    gap: 48px;
+    padding: 24px 32px;
+    background: #0f0f0f;
+    border: 1px solid var(--border);
+}
+
+.ord-detail-left {
+    min-width: 220px;
+    flex-shrink: 0;
+}
+
+.ord-detail-right {
+    flex: 1;
+    min-width: 0;
+}
+
+.ord-detail-heading {
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+}
+
+.ord-detail-line {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    line-height: 1.8;
+}
+
+
+
+.ord-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+}
+
+.ord-items-table th {
+    font-size: 0.48rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ord-items-table td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--cream);
+    letter-spacing: 0.03em;
+}
+
+.ord-items-table tr:last-child td { border-bottom: none; }
