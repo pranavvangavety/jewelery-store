@@ -32,7 +32,14 @@ export const adminUpdateProductStatus = (id, status) =>
     axiosInstance.patch(`/products/${id}/status`, null, { params: { status } })
 // status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED'
 
+export const adminGetFeaturedProducts = () =>
+    axiosInstance.get('/featured')
 
+export const adminAddFeaturedProduct = (productId) =>
+    axiosInstance.post(`/featured/${productId}`)
+
+export const adminRemoveFeaturedProduct = (productId) =>
+    axiosInstance.delete(`/featured/${productId}`)
 // Variants
 
 export const adminAddVariant = (productId, data) =>

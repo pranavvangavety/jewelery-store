@@ -17,3 +17,7 @@ export const getProductById = (id) => {
 export const getVariantDetails = (variantId) => {
     return axiosInstance.get(`/products/variants/${variantId}/details`)
 }
+
+export const getFeaturedProducts = () => {
+    return axiosInstance.get('/featured')
+}

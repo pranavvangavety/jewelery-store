@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { getProductById } from "../api/productApi.js"
+import { getFeaturedProducts } from "../api/productApi.js"
 import ProductCard from "../components/ProductCard.jsx"
 import "./HomePage.css"
 
@@ -39,18 +39,14 @@ const CATEGORIES = [
     }
 ]
 
-const FEATURED_IDS = [1,2,3]
-
 export default function HomePage() {
     const [featuredProducts, setFeaturedProducts] = useState([])
 
     useEffect(() => {
         const fetchFeatured = async () => {
             try {
-                const results = await Promise.all(
-                    FEATURED_IDS.map(id => getProductById(id))
-                )
-                setFeaturedProducts(results.map(r => r.data))
+                const res = await getFeaturedProducts()
+                setFeaturedProducts(res.data)
             } catch (err) {
                 console.error('Failed to load featured products', err)
             }
