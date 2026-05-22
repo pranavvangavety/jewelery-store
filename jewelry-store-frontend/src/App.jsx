@@ -18,6 +18,7 @@ import CataloguePage from "./admin/pages/CataloguePage.jsx";
 import ProductFormPage from "./admin/pages/ProductFormPage.jsx";
 import InventoryPage from "./admin/pages/InventoryPage.jsx";
 import OrdersPage from "./admin/pages/OrdersPage.jsx";
+import FeaturedPage from "./admin/pages/FeaturedPage.jsx";
 
 function App() {
     return (
@@ -47,6 +48,7 @@ function App() {
                     <Route path="products/:id/edit" element={<ProductFormPage />} />
                     <Route path="inventory" element={<InventoryPage />} />
                     <Route path="orders" element={<OrdersPage />} />
+                    <Route path="featured" element={<FeaturedPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>
