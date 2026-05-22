@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { adminGetAllOrders } from '../../api/adminApi.js'
 import './OrdersPage.css'
 
@@ -85,7 +85,7 @@ export default function OrdersPage() {
                         {orders.map(order => {
                             const isExpanded = expandedId === order.id
                             return (
-                                <>
+                                <React.Fragment key={order.id}>
                                     <tr key={order.id} className={isExpanded ? 'ord-row--expanded' : ''}>
                                         <td className="ord-td-muted">#{order.id}</td>
                                         <td className="ord-td-name">
@@ -172,7 +172,7 @@ export default function OrdersPage() {
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </React.Fragment>
                             )
                         })}
                         </tbody>
