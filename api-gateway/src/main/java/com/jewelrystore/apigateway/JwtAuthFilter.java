@@ -32,7 +32,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_GET_PATHS = List.of(
             "/api/products",
             "/api/categories",
-            "/api/inventory"
+            "/api/inventory",
+            "/api/featured"
     );
 
     private static final List<String> OPTIONAL_PATHS = List.of(
