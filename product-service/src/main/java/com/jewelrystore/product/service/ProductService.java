@@ -287,7 +287,7 @@ public class ProductService {
     }
 
 
-    private ProductResponse mapToResponse(Product product) {
+    public ProductResponse mapToResponse(Product product) {
         List<ProductVariantResponse> variants = product.getVariants().stream()
                 .map(v -> ProductVariantResponse.builder()
                         .id(v.getId())
