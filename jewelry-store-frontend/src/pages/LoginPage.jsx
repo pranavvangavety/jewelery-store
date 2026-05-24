@@ -36,7 +36,11 @@ export default function LoginPage() {
             }
             response.data.role === 'ADMIN' ? navigate('/admin') : navigate('/')
         } catch (err) {
-            setError('Invalid email or password')
+            if (!err.response || err.response.status >= 500) {
+                setError('Unable to connect. Please try again later.')
+            } else {
+                setError('Invalid email or password')
+            }
         } finally {
             setLoading(false)
         }
@@ -51,7 +55,7 @@ export default function LoginPage() {
                     <p className="auth-subtitle">Sign in to your account</p>
                 </div>
 
-                <div className="auth-form">
+                <form className="auth-form" onSubmit={handleSubmit}>
                     {error && <p className="auth-error">{error}</p>}
 
                     <input
@@ -82,13 +86,13 @@ export default function LoginPage() {
                     </div>
 
                     <button
+                        type="submit"
                         className="auth-submit-btn"
-                        onClick={handleSubmit}
                         disabled={loading}
                     >
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>
-                </div>
+                </form>
 
                 <p className="auth-footer">
                     Don't have an account? <Link to="/register">Create one</Link>
