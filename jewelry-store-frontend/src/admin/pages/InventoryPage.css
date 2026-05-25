@@ -180,3 +180,19 @@
     color: #c0392b;
     letter-spacing: 0.03em;
 }
+
+.inv-search {
+    padding: 6px 12px;
+    background: #111;
+    border: 1px solid var(--border);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    outline: none;
+    width: 200px;
+    transition: border-color 0.15s;
+}
+
+.inv-search:focus { border-color: var(--gold); }
+.inv-search::placeholder { color: var(--muted); }

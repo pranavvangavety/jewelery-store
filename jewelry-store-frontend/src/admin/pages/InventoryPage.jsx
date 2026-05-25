@@ -22,10 +22,36 @@ export default function InventoryPage() {
     const [editValue, setEditValue]   = useState('')
     const [saving, setSaving]         = useState(false)
     const [saveError, setSaveError]   = useState(null)
+    const [filterStatus,setFilterStatus] = useState('ALL')
+    const [search, setSearch] = useState('')
+    const [sortBy, setSortBy] = useState('name-asc')
+    const [filterCategory, setFilterCategory] = useState('ALL')
 
     useEffect(() => {
         fetchData()
     }, [])
+
+    const displayedRows = rows
+        .filter(r => {
+            if (filterStatus === 'out') return r.availableQuantity === 0
+            if (filterStatus === 'low') return r.availableQuantity > 0 && r.availableQuantity <= 5
+            if (filterStatus === 'ok')  return r.availableQuantity > 5
+            return true
+        })
+        .filter(r => filterCategory === 'ALL' || r.categoryName === filterCategory)
+        .filter(r => {
+            if (!search) return true
+            const q = search.toLowerCase()
+            return r.productName.toLowerCase().includes(q) || r.sku.toLowerCase().includes(q)
+        })
+        .sort((a, b) => {
+            if (sortBy === 'name-desc')  return b.productName.localeCompare(a.productName)
+            if (sortBy === 'avail-asc')  return a.availableQuantity - b.availableQuantity
+            if (sortBy === 'avail-desc')   return b.availableQuantity - a.availableQuantity
+            if (sortBy === 'id-asc')       return a.variantId - b.variantId
+            if (sortBy === 'id-desc')      return b.variantId - a.variantId
+            return a.productName.localeCompare(b.productName)
+        })
 
     async function fetchData() {
         setLoading(true)
@@ -47,11 +73,12 @@ export default function InventoryPage() {
                     const stock = inventoryMap[variant.id]
                     if (!stock) return
                     enriched.push({
-                        variantId:         variant.id,
-                        sku:               variant.sku,
-                        productName:       product.name,
-                        quantity:          stock.quantity,
-                        reservedQuantity:  stock.reservedQuantity,
+                        variantId: variant.id,
+                        sku: variant.sku,
+                        productName: product.name,
+                        categoryName: product.category?.name || '',
+                        quantity: stock.quantity,
+                        reservedQuantity: stock.reservedQuantity,
                         availableQuantity: stock.availableQuantity,
                     })
                 })
@@ -109,7 +136,58 @@ export default function InventoryPage() {
 
             {!loading && !error && (
                 <>
-                    <p className="inv-count">{rows.length} variants</p>
+                    <p className="inv-count">{displayedRows.length} of {rows.length} variants</p>
+
+                    <div className="cat-filters">
+                        <div className="cat-filter-status">
+                            {[
+                                { value: 'ALL', label: 'All'          },
+                                { value: 'ok',  label: 'In Stock'     },
+                                { value: 'low', label: 'Low Stock'    },
+                                { value: 'out', label: 'Out of Stock' },
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    className={`cat-filter-btn ${filterStatus === value ? 'cat-filter-btn--active' : ''}`}
+                                    onClick={() => setFilterStatus(value)}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="cat-filter-right">
+                            <input
+                                className="inv-search"
+                                type="text"
+                                placeholder="Search product or SKU…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                            <select
+                                className="cat-filter-select"
+                                value={filterCategory}
+                                onChange={e => setFilterCategory(e.target.value)}
+                            >
+                                <option value="ALL">All Categories</option>
+                                {[...new Set(rows.map(r => r.categoryName).filter(Boolean))].sort().map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                            <select
+                                className="cat-filter-select"
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value)}
+                            >
+                                <option value="name-asc">Name A → Z</option>
+                                <option value="name-desc">Name Z → A</option>
+                                <option value="avail-asc">Available: Low → High</option>
+                                <option value="avail-desc">Available: High → Low</option>
+                                <option value="id-asc">Variant ID: Low → High</option>
+                                <option value="id-desc">Variant ID: High → Low</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <table className="inv-table">
                         <thead>
@@ -125,7 +203,7 @@ export default function InventoryPage() {
                         </tr>
                         </thead>
                         <tbody>
-                        {rows.map(row => {
+                        {displayedRows.map(row => {
                             const isEditing = editingId === row.variantId
                             const status    = getStockStatus(row.availableQuantity)
                             return (
