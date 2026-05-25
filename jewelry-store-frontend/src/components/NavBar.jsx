@@ -1,5 +1,5 @@
 import {useAuth} from "../context/AuthContext.jsx";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {getAllCategories} from "../api/productApi.js";
 import { ShoppingBag } from "lucide-react";
@@ -8,7 +8,16 @@ import "./NavBar.css";
 
 export default function NavBar() {
     const {user, logout, cartCount} = useAuth()
+    const navigate = useNavigate()
     const [categories, setCategories] = useState([])
+    const [searchQuery, setSearchQuery] = useState('')
+
+    function handleSearch(e) {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+            setSearchQuery('')
+        }
+    }
 
 
     useEffect(() => {
@@ -28,6 +37,17 @@ export default function NavBar() {
         <nav className="navbar">
             <div className="nav-top">
                 <Link to="/" className="nav-logo">Jewelry <span>Store</span></Link>
+
+                <div className="nav-search">
+                    <input
+                        className="nav-search-input"
+                        type="text"
+                        placeholder="Search jewellery…"
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                    />
+                </div>
 
                 <div className="nav-right">
                     {user ? (
