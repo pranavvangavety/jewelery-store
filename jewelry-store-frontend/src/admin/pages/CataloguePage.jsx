@@ -28,11 +28,30 @@ export default function CataloguePage() {
     const [catDesc, setCatDesc] = useState('')
     const [catSaving, setCatSaving] = useState(false)
     const [catFormError, setCatFormError] = useState(null)
+    const [filterStatus, setFilterStatus] = useState('ALL')
+    const [filterCategory, setFilterCategory] = useState('ALL')
+    const [sortBy,setSortBy] = useState('id-desc')
+    const [search, setSearch] = useState('')
 
     useEffect(() => {
         fetchProducts()
         fetchCategories()
     }, [])
+
+    const displayedProducts = products
+        .filter(p => filterStatus   === 'ALL' || p.status === filterStatus)
+        .filter(p => filterCategory === 'ALL' || String(p.category?.id) === filterCategory)
+        .filter(p => {
+            if (!search) return true
+            const q = search.toLowerCase()
+            return p.name.toLowerCase().includes(q) || p.material?.toLowerCase().includes(q)
+        })
+        .sort((a, b) => {
+            if (sortBy === 'name-asc') return a.name.localeCompare(b.name)
+            if (sortBy === 'name-desc') return b.name.localeCompare(a.name)
+            if (sortBy === 'id-asc') return a.id - b.id
+            return b.id - a.id
+        })
 
     async function fetchProducts() {
         setProductsLoading(true)
@@ -124,7 +143,7 @@ export default function CataloguePage() {
                 <div className="cat-section">
                     <div className="cat-section-header">
                         <p className="cat-count">
-                            {productsLoading ? '—' : `${products.length} products`}
+                            {productsLoading ? '—' : `${displayedProducts.length} of ${products.length} products`}
                         </p>
                         <button
                             className="cat-btn-primary"
@@ -132,6 +151,51 @@ export default function CataloguePage() {
                         >
                             + New Product
                         </button>
+                    </div>
+
+                    <div className="cat-filters">
+                        <div className="cat-filter-status">
+                            {['ALL', 'DRAFT', 'ACTIVE', 'INACTIVE', 'DISCONTINUED'].map(s => (
+                                <button
+                                    key={s}
+                                    className={`cat-filter-btn ${filterStatus === s ? 'cat-filter-btn--active' : ''}`}
+                                    onClick={() => setFilterStatus(s)}
+                                >
+                                    {s === 'ALL' ? 'All' : s}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="cat-filter-right">
+                            <input
+                                className="inv-search"
+                                type="text"
+                                placeholder="Search name or material…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                            <select
+                                className="cat-filter-select"
+                                value={filterCategory}
+                                onChange={e => setFilterCategory(e.target.value)}
+                            >
+                                <option value="ALL">All Categories</option>
+                                {categories.map(c => (
+                                    <option key={c.id} value={String(c.id)}>{c.name}</option>
+                                ))}
+                            </select>
+
+                            <select
+                                className="cat-filter-select"
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value)}
+                            >
+                                <option value="id-desc">Newest First</option>
+                                <option value="id-asc">Oldest First</option>
+                                <option value="name-asc">Name A → Z</option>
+                                <option value="name-desc">Name Z → A</option>
+                            </select>
+                        </div>
                     </div>
 
                     {productsLoading && <p className="cat-loading">Loading…</p>}
@@ -151,7 +215,7 @@ export default function CataloguePage() {
                             </tr>
                             </thead>
                             <tbody>
-                            {products.map(product => (
+                            {displayedProducts.map(product => (
                                 <tr key={product.id}>
                                     <td className="cat-td-muted">#{product.id}</td>
                                     <td className="cat-td-name">{product.name}</td>
