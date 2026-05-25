@@ -32,6 +32,8 @@ export default function OrdersPage() {
     const [loading, setLoading] = useState(true)
     const [error,   setError]   = useState(null)
     const [expandedId, setExpandedId] = useState(null)
+    const [filterStatus, setFilterStatus] = useState('ALL')
+    const [sortBy,setSortBy] = useState('date-desc')
 
     useEffect(() => {
         async function fetchOrders() {
@@ -50,6 +52,15 @@ export default function OrdersPage() {
         fetchOrders()
     }, [])
 
+    const displayedOrders = orders
+        .filter(o => filterStatus === 'ALL' || o.orderStatus === filterStatus)
+        .sort((a, b) => {
+            if (sortBy === 'date-asc') return new Date(a.createdAt) - new Date(b.createdAt)
+            if (sortBy === 'total-desc') return b.totalAmount - a.totalAmount
+            if (sortBy === 'total-asc') return a.totalAmount - b.totalAmount
+            return new Date(b.createdAt) - new Date(a.createdAt)
+        })
+
     function toggleExpand(orderId) {
         setExpandedId(prev => prev === orderId ? null : orderId)
     }
@@ -67,7 +78,42 @@ export default function OrdersPage() {
 
             {!loading && !error && (
                 <>
-                    <p className="ord-count">{orders.length} orders</p>
+                    <p className="ord-count">{displayedOrders.length} of {orders.length} orders</p>
+
+                    <div className="cat-filters">
+                        <div className="cat-filter-status">
+                            {[
+                                { value: 'ALL',label: 'All'},
+                                { value: 'PENDING_PAYMENT', label: 'Pending Payment'},
+                                { value: 'CONFIRMED', label: 'Confirmed'},
+                                { value: 'SHIPPED',label: 'Shipped'},
+                                { value: 'DELIVERED',label: 'Delivered'},
+                                { value: 'CANCELLED',label: 'Cancelled'},
+                                { value: 'FAILED', label: 'Failed'},
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={value}
+                                    className={`cat-filter-btn ${filterStatus === value ? 'cat-filter-btn--active' : ''}`}
+                                    onClick={() => setFilterStatus(value)}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="cat-filter-right">
+                            <select
+                                className="cat-filter-select"
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value)}
+                            >
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="total-desc">Total: High → Low</option>
+                                <option value="total-asc">Total: Low → High</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <table className="ord-table">
                         <thead>
@@ -82,7 +128,7 @@ export default function OrdersPage() {
                         </tr>
                         </thead>
                         <tbody>
-                        {orders.map(order => {
+                        {displayedOrders.map(order => {
                             const isExpanded = expandedId === order.id
                             return (
                                 <React.Fragment key={order.id}>
