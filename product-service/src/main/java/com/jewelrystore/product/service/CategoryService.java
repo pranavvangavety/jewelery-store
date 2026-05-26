@@ -5,8 +5,10 @@ import com.jewelrystore.product.dto.CategoryRequest;
 import com.jewelrystore.product.dto.CategoryResponse;
 import com.jewelrystore.product.entity.Category;
 import com.jewelrystore.product.exception.DuplicateResourceException;
+import com.jewelrystore.product.exception.InvalidOperationException;
 import com.jewelrystore.product.exception.ResourceNotFoundException;
 import com.jewelrystore.product.repository.CategoryRepository;
+import com.jewelrystore.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final Slugify slugify = Slugify.builder().build();
 
     public CategoryResponse createCategory(CategoryRequest request) {
@@ -40,16 +43,31 @@ public class CategoryService {
 
 
     public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll()
+        return categoryRepository.findAllByOrderByIdAsc()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    public CategoryResponse updateCategory(Long id, String description){
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+        category.setDescription(description);
+
+        Category saved = categoryRepository.save(category);
+        log.info("Updated category: {}", saved.getName());
+        return mapToResponse(saved);
     }
 
 
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+
+        if(productRepository.existsByCategoryId(id)){
+            throw new InvalidOperationException("Cannot delete category '"+ category.getName() + " ': products are assigned to it. Reassign them first.");
+        }
         categoryRepository.delete(category);
         log.info("Deleted Category: {}", category.getName());
     }
