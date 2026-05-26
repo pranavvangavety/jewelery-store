@@ -12,6 +12,8 @@ export const adminCreateCategory = (data) =>
 export const adminDeleteCategory = (id) =>
     axiosInstance.delete(`/categories/${id}`)
 
+export const adminUpdateCategory = (id, description) =>
+    axiosInstance.put(`/categories/${id}`, null, { params: { description } })
 
 // Products
 
