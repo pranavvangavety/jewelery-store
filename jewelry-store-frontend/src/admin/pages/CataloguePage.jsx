@@ -6,6 +6,7 @@ import {
     adminUpdateProductStatus,
     adminCreateCategory,
     adminDeleteCategory,
+    adminUpdateCategory,
 } from '../../api/adminApi.js'
 import './CataloguePage.css'
 
@@ -32,6 +33,8 @@ export default function CataloguePage() {
     const [filterCategory, setFilterCategory] = useState('ALL')
     const [sortBy,setSortBy] = useState('id-desc')
     const [search, setSearch] = useState('')
+    const [editingCatId, setEditingCatId]   = useState(null)
+    const [editingDesc, setEditingDesc]     = useState('')
 
     useEffect(() => {
         fetchProducts()
@@ -113,6 +116,16 @@ export default function CataloguePage() {
             setCategories(prev => prev.filter(c => c.id !== id))
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to delete category.')
+        }
+    }
+
+    async function handleUpdateCategory(id) {
+        try {
+            const res = await adminUpdateCategory(id, editingDesc)
+            setCategories(prev => prev.map(c => c.id === id ? res.data : c))
+            setEditingCatId(null)
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update category.')
         }
     }
 
@@ -309,14 +322,47 @@ export default function CataloguePage() {
                                     <td className="cat-td-muted">#{cat.id}</td>
                                     <td className="cat-td-name">{cat.name}</td>
                                     <td className="cat-td-muted">{cat.slug}</td>
-                                    <td className="cat-td-muted">{cat.description || '—'}</td>
+                                    <td className="cat-td-muted">
+                                        {editingCatId === cat.id
+                                            ? <input
+                                                className="cat-input"
+                                                value={editingDesc}
+                                                onChange={e => setEditingDesc(e.target.value)}
+                                            />
+                                            : cat.description || '—'
+                                        }
+                                    </td>
                                     <td>
-                                        <button
-                                            className="cat-action-btn cat-action-btn--danger"
-                                            onClick={() => handleDeleteCategory(cat.id)}
-                                        >
-                                            Delete
-                                        </button>
+                                        {editingCatId === cat.id
+                                            ? <>
+                                                <button
+                                                    className="cat-action-btn"
+                                                    onClick={() => handleUpdateCategory(cat.id)}
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    className="cat-action-btn"
+                                                    onClick={() => setEditingCatId(null)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                            : <>
+                                                <button
+                                                    className="cat-action-btn"
+                                                    onClick={() => { setEditingCatId(cat.id); setEditingDesc(cat.description || '') }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="cat-action-btn cat-action-btn--danger"
+                                                    onClick={() => handleDeleteCategory(cat.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </>
+                                        }
                                     </td>
                                 </tr>
                             ))}
