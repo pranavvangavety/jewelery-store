@@ -1,6 +1,7 @@
 package com.jewelrystore.product.controller;
 
 import com.jewelrystore.product.dto.*;
+import com.jewelrystore.product.entity.Category;
 import com.jewelrystore.product.entity.ProductStatus;
 import com.jewelrystore.product.service.CategoryService;
 import com.jewelrystore.product.service.ProductService;
@@ -36,6 +37,11 @@ public class ProductController {
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/categories/{id}") //ADMIN
+    public ResponseEntity <CategoryResponse> updateCategory(@PathVariable Long id, @RequestParam String description) {
+        return ResponseEntity.ok(categoryService.updateCategory(id, description));
     }
 
     //Product Endpoints
