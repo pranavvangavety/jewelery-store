@@ -144,6 +144,11 @@
     font-size: 0.55rem;
 }
 
+.nav-category--active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+}
+
 /*For mobile*/
 
 @media (max-width: 640px) {
@@ -187,5 +192,7 @@
         display: flex;
         align-items: center;
     }
+
+
 
 }

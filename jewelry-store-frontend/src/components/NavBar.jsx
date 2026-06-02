@@ -1,5 +1,5 @@
 import {useAuth} from "../context/AuthContext.jsx";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useNavigate, useLocation} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {getAllCategories} from "../api/productApi.js";
 import { ShoppingBag } from "lucide-react";
@@ -32,6 +32,10 @@ export default function NavBar() {
 
         fetchCategories()
     }, [])
+
+    const location = useLocation()
+    const params = new URLSearchParams(location.search)
+    const activeCategoryId = params.get('categoryId')
 
     return (
         <nav className="navbar">
@@ -83,9 +87,18 @@ export default function NavBar() {
             </div>
 
             <div className="nav-categories">
-                <Link className="nav-category" to="/products">All</Link>
+                <Link
+                    className={`nav-category ${!activeCategoryId && location.pathname === '/products' ? 'nav-category--active' : ''}`}
+                    to="/products"
+                >
+                    All
+                </Link>
                 {categories.map(category => (
-                    <Link className="nav-category" key={category.id} to={`/products?categoryId=${category.id}`}>
+                    <Link
+                        className={`nav-category ${activeCategoryId === String(category.id) ? 'nav-category--active' : ''}`}
+                        key={category.id}
+                        to={`/products?categoryId=${category.id}`}
+                    >
                         {category.name}
                     </Link>
                 ))}
