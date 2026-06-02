@@ -19,15 +19,20 @@ import ProductFormPage from "./admin/pages/ProductFormPage.jsx";
 import InventoryPage from "./admin/pages/InventoryPage.jsx";
 import OrdersPage from "./admin/pages/OrdersPage.jsx";
 import FeaturedPage from "./admin/pages/FeaturedPage.jsx";
+import Footer from "./components/Footer.jsx";
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route element={<><NavBar /><Outlet /></>}>
+                <Route element={
+                    <div className="site-layout">
+                        <NavBar />
+                        <main className="site-main"><Outlet /></main>
+                        <Footer />
+                    </div>
+                }>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/products/:id" element={<ProductDetailsPage />} />
                     <Route path="/cart" element={<CartPage />} />
@@ -35,6 +40,16 @@ function App() {
                     <Route path="/orders/confirmation/:orderId" element={<OrderConfirmationPage />} />
                     <Route path="/orders/" element={<OrderHistoryPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                </Route>
+
+                <Route element={
+                    <div className="site-layout">
+                        <NavBar />
+                        <main className="site-main"><Outlet /></main>
+                    </div>
+                }>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
                 </Route>
 
                 <Route path="/admin" element={
