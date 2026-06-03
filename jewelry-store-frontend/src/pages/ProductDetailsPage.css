@@ -239,6 +239,33 @@
     color: var(--muted);
 }
 
+.pdp-featured-scroll-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pdp-scroll-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--cream);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdp-scroll-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
 /*Mobile*/
 
 @media (max-width: 768px) {

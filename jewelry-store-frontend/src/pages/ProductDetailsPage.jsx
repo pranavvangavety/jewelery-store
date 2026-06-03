@@ -1,9 +1,10 @@
 import {useParams} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import {addToCart} from "../api/cartApi.js";
-import {getProductById} from "../api/productApi.js";
+import {getProductById, getFeaturedProducts} from "../api/productApi.js";
 import "./ProductDetailsPage.css"
 import {useAuth} from "../context/AuthContext.jsx";
+import ProductCard from "../components/ProductCard.jsx";
 
 export default function ProductDetailsPage() {
     const {id} = useParams()
@@ -17,8 +18,15 @@ export default function ProductDetailsPage() {
     const [quantity, setQuantity] = useState(1)
     const [cartStatus, setCartStatus] = useState(null)
     const [cartError, setCartError] = useState(null)
+    const [featuredProducts, setFeaturedProducts] = useState([])
 
     const { setCartCount } = useAuth()
+
+    const scrollRef = useRef(null)
+
+    const scroll = (dir) => {
+        scrollRef.current.scrollBy({ left: dir * 300, behavior: 'smooth' })
+    }
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -38,6 +46,15 @@ export default function ProductDetailsPage() {
     useEffect(() => {
         setSelectedImageIndex(0)
     }, [selectedVariant])
+
+    useEffect(() => {
+        getFeaturedProducts()
+            .then(res => {
+                const others = res.data.filter(p => p.id !== Number(id))
+                setFeaturedProducts(others)
+            })
+            .catch(() => {})
+    }, [id])
 
     const handleAddToCart = async () => {
         if(!selectedVariant) return
@@ -61,91 +78,108 @@ export default function ProductDetailsPage() {
     const displayImage = images[selectedImageIndex] ?? primaryImage
 
     return (
-        <div className="pdp-page">
+        <>
+            <div className="pdp-page">
 
-            <div className="pdp-gallery">
-                <div className="pdp-main-image">
-                    <img
-                        src={displayImage?.url || '/placeholder.jpg'}
-                        alt={displayImage?.altText || product.name}
-                    />
-                </div>
-                {images.length > 1 && (
-                    <div className="pdp-thumbnails">
-                        {images.map((img, index) => (
-                            <div
-                                key={img.id}
-                                className={`pdp-thumb ${index === selectedImageIndex ? 'active' : ''}`}
-                                onClick={() => setSelectedImageIndex(index)}
-                            >
-                                <img src={img.url} alt={img.altText || product.name} />
-                            </div>
-                        ))}
+                <div className="pdp-gallery">
+                    <div className="pdp-main-image">
+                        <img
+                            src={displayImage?.url || '/placeholder.jpg'}
+                            alt={displayImage?.altText || product.name}
+                        />
                     </div>
-                )}
-            </div>
-
-
-            <div className="pdp-info">
-                <div className="pdp-category">{product.category.name}</div>
-                <h1 className="pdp-name">{product.name}</h1>
-                <div className="pdp-material">{product.material.replace(/_/g, ' ')}</div>
-                <p className="pdp-description">{product.description}</p>
-
-                {selectedVariant && (
-                    <div className="pdp-price">${selectedVariant.price}</div>
-                )}
-
-                <div className="pdp-section-label">Select Variant</div>
-                <select
-                    className="pdp-select"
-                    value={selectedVariant?.id ?? ''}
-                    onChange={(e) => {
-                        const variant = product.variants.find(v => v.id === Number(e.target.value))
-                        setSelectedVariant(variant)
-                    }}
-                >
-                    {product.variants.map(v => (
-                        <option key={v.id} value={v.id}>
-                            {(() => {
-                                const parts = [v.color, v.size].filter(Boolean)
-                                return parts.length > 0
-                                    ? `${parts.join(' / ')} — $${v.price}`
-                                    : `Variant ${product.variants.indexOf(v) + 1} — $${v.price}`
-                            })()}
-                        </option>
-                    ))}
-                </select>
-
-                <div className="pdp-section-label">Quantity</div>
-                <div className="pdp-quantity">
-                    <button
-                        className="pdp-qty-btn"
-                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        disabled={quantity <= 1}
-                    >−</button>
-                    <span className="pdp-qty-value">{quantity}</span>
-                    <button
-                        className="pdp-qty-btn"
-                        onClick={() => setQuantity(q => q + 1)}
-                    >+</button>
+                    {images.length > 1 && (
+                        <div className="pdp-thumbnails">
+                            {images.map((img, index) => (
+                                <div
+                                    key={img.id}
+                                    className={`pdp-thumb ${index === selectedImageIndex ? 'active' : ''}`}
+                                    onClick={() => setSelectedImageIndex(index)}
+                                >
+                                    <img src={img.url} alt={img.altText || product.name} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <button
-                    className="pdp-add-btn"
-                    onClick={handleAddToCart}
-                    disabled={!selectedVariant}
-                >
-                    Add to Cart
-                </button>
+                <div className="pdp-info">
+                    <div className="pdp-category">{product.category.name}</div>
+                    <h1 className="pdp-name">{product.name}</h1>
+                    <div className="pdp-material">{product.material.replace(/_/g, ' ')}</div>
+                    <p className="pdp-description">{product.description}</p>
 
-                {cartStatus === 'success' && (
-                    <div className="pdp-cart-success">Added to your cart</div>
-                )}
-                {cartStatus === 'error' && (
-                    <div className="pdp-cart-error">{cartError || 'Failed to add to cart. Try again.'}</div>
-                )}
+                    {selectedVariant && (
+                        <div className="pdp-price">${selectedVariant.price}</div>
+                    )}
+
+                    <div className="pdp-section-label">Select Variant</div>
+                    <select
+                        className="pdp-select"
+                        value={selectedVariant?.id ?? ''}
+                        onChange={(e) => {
+                            const variant = product.variants.find(v => v.id === Number(e.target.value))
+                            setSelectedVariant(variant)
+                        }}
+                    >
+                        {product.variants.map(v => (
+                            <option key={v.id} value={v.id}>
+                                {(() => {
+                                    const parts = [v.color, v.size].filter(Boolean)
+                                    return parts.length > 0
+                                        ? `${parts.join(' / ')} — $${v.price}`
+                                        : `Variant ${product.variants.indexOf(v) + 1} — $${v.price}`
+                                })()}
+                            </option>
+                        ))}
+                    </select>
+
+                    <div className="pdp-section-label">Quantity</div>
+                    <div className="pdp-quantity">
+                        <button
+                            className="pdp-qty-btn"
+                            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                            disabled={quantity <= 1}
+                        >−</button>
+                        <span className="pdp-qty-value">{quantity}</span>
+                        <button
+                            className="pdp-qty-btn"
+                            onClick={() => setQuantity(q => q + 1)}
+                        >+</button>
+                    </div>
+
+                    <button
+                        className="pdp-add-btn"
+                        onClick={handleAddToCart}
+                        disabled={!selectedVariant}
+                    >
+                        Add to Cart
+                    </button>
+
+                    {cartStatus === 'success' && (
+                        <div className="pdp-cart-success">Added to your cart</div>
+                    )}
+                    {cartStatus === 'error' && (
+                        <div className="pdp-cart-error">{cartError || 'Failed to add to cart. Try again.'}</div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {featuredProducts.length > 0 && (
+                <section className="pdp-featured">
+                    <p className="pdp-featured-label">✦ &nbsp; You May Also Like &nbsp; ✦</p>
+                    <div className="pdp-featured-scroll-wrapper">
+                        <button className="pdp-scroll-btn pdp-scroll-btn--left" onClick={() => scroll(-1)}>&#8592;</button>
+                        <div className="pdp-featured-grid" ref={scrollRef}>
+                            {featuredProducts.map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                        <button className="pdp-scroll-btn pdp-scroll-btn--right" onClick={() => scroll(1)}>&#8594;</button>
+                    </div>
+                </section>
+            )}
+
+        </>
     )
 }
