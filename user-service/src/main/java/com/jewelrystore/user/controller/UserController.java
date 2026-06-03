@@ -37,6 +37,15 @@ public class UserController {
         return ResponseEntity.ok(userService.addAddress(authId, request));
     }
 
+    @PutMapping("/me/addresses/{addressId}")
+    public ResponseEntity<AddressResponse> updateAddress(
+            @RequestHeader("X-User-Id") Long authId,
+            @PathVariable Long addressId,
+            @Valid @RequestBody AddressRequest request
+    ) {
+        return ResponseEntity.ok(userService.updateAddress(authId, addressId, request));
+    }
+
     @DeleteMapping("/me/addresses/{addressId}")
     public ResponseEntity<Void> deleteAddress(
             @RequestHeader("X-User-Id") Long authId,

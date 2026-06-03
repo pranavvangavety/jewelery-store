@@ -152,6 +152,32 @@ public class UserService {
     }
 
     @Transactional
+    public AddressResponse updateAddress(Long authId, Long addressId, AddressRequest request) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId).orElseThrow(() -> new ResourceNotFoundException("Profile not found for authId: " + authId));
+
+        Address address = profile.getAddresses().stream().filter(a -> a.getId().equals(addressId))
+                .findFirst().orElseThrow(() -> new ResourceNotFoundException("Address not found with addressId: " + addressId));
+
+        address.setStreet(request.getStreet());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setZipCode(request.getZipCode());
+        address.setCountry(request.getCountry());
+
+        addressRepository.save(address);
+
+        return AddressResponse.builder()
+                .id(address.getId())
+                .street(address.getStreet())
+                .city(address.getCity())
+                .state(address.getState())
+                .zipCode(address.getZipCode())
+                .country(address.getCountry())
+                .defaultAddress(address.isDefaultAddress())
+                .build();
+    }
+
+    @Transactional
     public UserProfileResponse setDefaultAddress(Long authId, Long addressId) {
         UserProfile profile = userProfileRepository.findByAuthId(authId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with authId: " + authId));
