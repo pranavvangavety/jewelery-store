@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { placeOrder } from "../api/orderApi.js"
 import { getCart } from "../api/cartApi.js"
-import { getMyProfile, addAddress } from "../api/userApi.js"
+import {getMyProfile, addAddress, updateAddress} from "../api/userApi.js"
 import { useAuth } from "../context/AuthContext.jsx"
 import "./CheckoutPage.css"
 
@@ -29,6 +29,10 @@ export default function CheckoutPage() {
     const [saveAddress, setSaveAddress] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [editingAddressId, setEditingAddressId] = useState(null)
+    const [editForm, setEditForm] = useState({ street: '', city: '', state: '', zipCode: '', country: '' })
+    const [editLoading, setEditLoading] = useState(false)
+    const [editError, setEditError] = useState(null)
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -111,6 +115,39 @@ export default function CheckoutPage() {
         }
     }
 
+    const handleEditClick = (e, addr) => {
+        e.stopPropagation() // prevent card selection from firing
+        setEditingAddressId(addr.id)
+        setEditForm({
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            zipCode: addr.zipCode,
+            country: addr.country,
+        })
+        setEditError(null)
+    }
+
+    const handleEditChange = (e) => {
+        setEditForm({ ...editForm, [e.target.name]: e.target.value })
+    }
+
+    const handleEditSubmit = async (e, addressId) => {
+        e.preventDefault()
+        setEditLoading(true)
+        setEditError(null)
+        try {
+            await updateAddress(addressId, editForm)
+            setEditingAddressId(null)
+            const res = await getMyProfile()
+            setSavedAddresses(res.data.addresses || [])
+        } catch (err) {
+            setEditError(err.response?.data?.message || 'Failed to update address.')
+        } finally {
+            setEditLoading(false)
+        }
+    }
+
     const isNewAddress = !selectedAddressId
     const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId)
 
@@ -173,14 +210,80 @@ export default function CheckoutPage() {
                                 {savedAddresses.map(addr => (
                                     <div
                                         key={addr.id}
-                                        className={`checkout-address-card ${selectedAddressId === addr.id ? 'active' : ''}`}
-                                        onClick={() => setSelectedAddressId(addr.id)}
+                                        className={`checkout-address-card ${selectedAddressId === addr.id && !editingAddressId ? 'active' : ''}`}
+                                        onClick={() => !editingAddressId && setSelectedAddressId(addr.id)}
                                     >
-                                        <p className="checkout-address-line">{addr.street}</p>
-                                        <p className="checkout-address-line">{addr.city}, {addr.state} {addr.zipCode}</p>
-                                        <p className="checkout-address-line">{addr.country}</p>
-                                        {addr.defaultAddress && (
-                                            <span className="checkout-address-default">Default</span>
+                                        {editingAddressId === addr.id ? (
+                                            <form className="checkout-edit-form" onSubmit={(e) => { e.stopPropagation(); handleEditSubmit(e, addr.id) }}>
+                                                <input
+                                                    className="checkout-input"
+                                                    name="street"
+                                                    value={editForm.street}
+                                                    onChange={handleEditChange}
+                                                    placeholder="Street"
+                                                    required
+                                                />
+                                                <div className="checkout-edit-row">
+                                                    <input
+                                                        className="checkout-input"
+                                                        name="city"
+                                                        value={editForm.city}
+                                                        onChange={handleEditChange}
+                                                        placeholder="City"
+                                                        required
+                                                    />
+                                                    <input
+                                                        className="checkout-input"
+                                                        name="state"
+                                                        value={editForm.state}
+                                                        onChange={handleEditChange}
+                                                        placeholder="State"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="checkout-edit-row">
+                                                    <input
+                                                        className="checkout-input"
+                                                        name="zipCode"
+                                                        value={editForm.zipCode}
+                                                        onChange={handleEditChange}
+                                                        placeholder="ZIP"
+                                                        required
+                                                    />
+                                                    <input
+                                                        className="checkout-input"
+                                                        name="country"
+                                                        value={editForm.country}
+                                                        onChange={handleEditChange}
+                                                        placeholder="Country"
+                                                        required
+                                                    />
+                                                </div>
+                                                {editError && <p className="checkout-error">{editError}</p>}
+                                                <div className="checkout-edit-actions">
+                                                    <button type="submit" className="checkout-edit-btn" disabled={editLoading}>
+                                                        {editLoading ? 'Saving…' : 'Save'}
+                                                    </button>
+                                                    <button type="button" className="checkout-edit-btn" onClick={(e) => { e.stopPropagation(); setEditingAddressId(null) }}>
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <>
+                                                <p className="checkout-address-line">{addr.street}</p>
+                                                <p className="checkout-address-line">{addr.city}, {addr.state} {addr.zipCode}</p>
+                                                <p className="checkout-address-line">{addr.country}</p>
+                                                {addr.defaultAddress && (
+                                                    <span className="checkout-address-default">Default</span>
+                                                )}
+                                                <button
+                                                    className="checkout-edit-address-btn"
+                                                    onClick={(e) => handleEditClick(e, addr)}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 ))}

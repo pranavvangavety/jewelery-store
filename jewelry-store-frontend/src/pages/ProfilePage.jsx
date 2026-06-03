@@ -6,7 +6,7 @@ import {
     updateProfile,
     addAddress,
     deleteAddress,
-    setDefaultAddress,
+    setDefaultAddress, updateAddress,
 } from "../api/userApi.js"
 import "./ProfilePage.css"
 
@@ -26,6 +26,10 @@ export default function ProfilePage() {
     })
     const [addressLoading, setAddressLoading] = useState(false)
     const [addressError, setAddressError] = useState(null)
+    const [editingAddressId, setEditingAddressId] = useState(null)
+    const [editForm, setEditForm] = useState({ street: '', city: '', state: '', zipCode: '', country: '' })
+    const [editLoading, setEditLoading] = useState(false)
+    const [editError, setEditError] = useState(null)
 
     useEffect(() => {
         if (!user) {
@@ -110,6 +114,37 @@ export default function ProfilePage() {
             await fetchProfile()
         } catch (err) {
             //nothing
+        }
+    }
+
+    const handleEditClick = (addr) => {
+        setEditingAddressId(addr.id)
+        setEditForm({
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            zipCode: addr.zipCode,
+            country: addr.country,
+        })
+        setEditError(null)
+    }
+
+    const handleEditChange = (e) => {
+        setEditForm({ ...editForm, [e.target.name]: e.target.value })
+    }
+
+    const handleEditSubmit = async (e, addressId) => {
+        e.preventDefault()
+        setEditLoading(true)
+        setEditError(null)
+        try {
+            await updateAddress(addressId, editForm)
+            setEditingAddressId(null)
+            await fetchProfile()
+        } catch (err) {
+            setEditError(err.response?.data?.message || 'Failed to update address.')
+        } finally {
+            setEditLoading(false)
         }
     }
 
@@ -267,29 +302,100 @@ export default function ProfilePage() {
                     <div className="address-list">
                         {profile.addresses?.map(addr => (
                             <div key={addr.id} className={`address-card ${addr.defaultAddress ? 'address-card--default' : ''}`}>
-                                {addr.defaultAddress && (
-                                    <span className="address-default-badge">Default</span>
-                                )}
-                                <p className="address-street">{addr.street}</p>
-                                <p className="address-line">{addr.city}, {addr.state} {addr.zipCode}</p>
-                                <p className="address-line">{addr.country}</p>
 
-                                <div className="address-actions">
-                                    {!addr.defaultAddress && (
-                                        <button
-                                            className="address-action-btn"
-                                            onClick={() => handleSetDefault(addr.id)}
-                                        >
-                                            Set as Default
-                                        </button>
-                                    )}
-                                    <button
-                                        className="address-action-btn address-action-btn--delete"
-                                        onClick={() => handleDeleteAddress(addr.id)}
-                                    >
-                                        Remove
-                                    </button>
-                                </div>
+                                {editingAddressId === addr.id ? (
+                                    <form className="address-edit-form" onSubmit={(e) => handleEditSubmit(e, addr.id)}>
+                                        <input
+                                            className="profile-input"
+                                            name="street"
+                                            value={editForm.street}
+                                            onChange={handleEditChange}
+                                            placeholder="Street address"
+                                            required
+                                        />
+                                        <div className="address-city-row">
+                                            <input
+                                                className="profile-input"
+                                                name="city"
+                                                value={editForm.city}
+                                                onChange={handleEditChange}
+                                                placeholder="City"
+                                                required
+                                            />
+                                            <input
+                                                className="profile-input"
+                                                name="state"
+                                                value={editForm.state}
+                                                onChange={handleEditChange}
+                                                placeholder="State"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="address-city-row">
+                                            <input
+                                                className="profile-input"
+                                                name="zipCode"
+                                                value={editForm.zipCode}
+                                                onChange={handleEditChange}
+                                                placeholder="ZIP code"
+                                                required
+                                            />
+                                            <input
+                                                className="profile-input"
+                                                name="country"
+                                                value={editForm.country}
+                                                onChange={handleEditChange}
+                                                placeholder="Country"
+                                                required
+                                            />
+                                        </div>
+                                        {editError && <p className="profile-error">{editError}</p>}
+                                        <div className="address-actions">
+                                            <button type="submit" className="address-action-btn" disabled={editLoading}>
+                                                {editLoading ? 'Saving…' : 'Save'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="address-action-btn"
+                                                onClick={() => setEditingAddressId(null)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <>
+                                        {addr.defaultAddress && (
+                                            <span className="address-default-badge">Default</span>
+                                        )}
+                                        <p className="address-street">{addr.street}</p>
+                                        <p className="address-line">{addr.city}, {addr.state} {addr.zipCode}</p>
+                                        <p className="address-line">{addr.country}</p>
+
+                                        <div className="address-actions">
+                                            <button
+                                                className="address-action-btn"
+                                                onClick={() => handleEditClick(addr)}
+                                            >
+                                                Edit
+                                            </button>
+                                            {!addr.defaultAddress && (
+                                                <button
+                                                    className="address-action-btn"
+                                                    onClick={() => handleSetDefault(addr.id)}
+                                                >
+                                                    Set as Default
+                                                </button>
+                                            )}
+                                            <button
+                                                className="address-action-btn address-action-btn--delete"
+                                                onClick={() => handleDeleteAddress(addr.id)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>

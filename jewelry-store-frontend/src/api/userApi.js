@@ -19,3 +19,7 @@ export const deleteAddress = (addressId) => {
 export const setDefaultAddress = (addressId) => {
     return axiosInstance.patch(`/users/me/addresses/${addressId}/default`)
 }
+
+export const updateAddress = (addressId, addressData) => {
+    return axiosInstance.put(`/users/me/addresses/${addressId}`, addressData)
+}
