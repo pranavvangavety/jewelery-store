@@ -90,12 +90,6 @@
     cursor: not-allowed;
 }
 
-.feat-cap-notice {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--gold);
-}
-
 .feat-action-error {
     font-size: 0.7rem;
     color: #c0392b;

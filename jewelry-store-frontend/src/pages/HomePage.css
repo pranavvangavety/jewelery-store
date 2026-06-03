@@ -175,25 +175,15 @@
     color: var(--black);
 }
 
-.hp-featured {
-    padding: 80px 48px;
-    text-align: center;
-}
-
-.hp-featured-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 48px;
-}
-
-.hp-featured-grid {
+.hp-featured-strip {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    max-width: 1000px;
-    margin: 0 auto;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+.hp-featured-strip .card-img-wrap {
+    aspect-ratio: 4/3;
+    max-height: none;
 }
 
 .hp-story {
@@ -355,8 +345,12 @@
         display: none;
     }
 
-    .hp-featured {
-        padding: 48px 20px;
+    .hp-featured-strip {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hp-featured-strip .card-img-wrap {
+        max-height: 200px;
     }
 
     .hp-story {

@@ -7,15 +7,13 @@ import {
 } from '../../api/adminApi.js'
 import './FeaturedPage.css'
 
-const MAX_FEATURED = 6
-
 export default function FeaturedPage() {
-    const [featured, setFeatured]   = useState([])
-    const [products, setProducts]   = useState([])
-    const [loading, setLoading]     = useState(true)
-    const [error, setError]         = useState(null)
+    const [featured, setFeatured]     = useState([])
+    const [products, setProducts]     = useState([])
+    const [loading, setLoading]       = useState(true)
+    const [error, setError]           = useState(null)
     const [selectedId, setSelectedId] = useState('')
-    const [adding, setAdding]       = useState(false)
+    const [adding, setAdding]         = useState(false)
     const [actionError, setActionError] = useState(null)
 
     useEffect(() => {
@@ -67,7 +65,6 @@ export default function FeaturedPage() {
 
     const featuredIds = new Set(featured.map(p => p.id))
     const available   = products.filter(p => !featuredIds.has(p.id))
-    const atCap       = featured.length >= MAX_FEATURED
 
     return (
         <div className="feat-page">
@@ -83,39 +80,29 @@ export default function FeaturedPage() {
             {!loading && !error && (
                 <>
                     <div className="feat-add-bar">
-                        <p className="feat-count">
-                            {featured.length} / {MAX_FEATURED} featured
-                        </p>
+                        <p className="feat-count">{featured.length} featured</p>
 
                         {actionError && <p className="feat-action-error">{actionError}</p>}
 
-                        {!atCap && (
-                            <div className="feat-add-row">
-                                <select
-                                    className="feat-select"
-                                    value={selectedId}
-                                    onChange={e => setSelectedId(e.target.value)}
-                                >
-                                    <option value="">— Select a product —</option>
-                                    {available.map(p => (
-                                        <option key={p.id} value={p.id}>{p.name}</option>
-                                    ))}
-                                </select>
-                                <button
-                                    className="feat-btn-primary"
-                                    onClick={handleAdd}
-                                    disabled={!selectedId || adding}
-                                >
-                                    {adding ? 'Adding…' : '+ Add'}
-                                </button>
-                            </div>
-                        )}
-
-                        {atCap && (
-                            <p className="feat-cap-notice">
-                                Maximum reached. Remove a product to add another.
-                            </p>
-                        )}
+                        <div className="feat-add-row">
+                            <select
+                                className="feat-select"
+                                value={selectedId}
+                                onChange={e => setSelectedId(e.target.value)}
+                            >
+                                <option value="">— Select a product —</option>
+                                {available.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                className="feat-btn-primary"
+                                onClick={handleAdd}
+                                disabled={!selectedId || adding}
+                            >
+                                {adding ? 'Adding…' : '+ Add'}
+                            </button>
+                        </div>
                     </div>
 
                     {featured.length === 0 ? (

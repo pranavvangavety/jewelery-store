@@ -54,15 +54,15 @@ export default function HomePage() {
         fetchFeatured()
     }, [])
 
+    const featured1 = featuredProducts.slice(0, 3)
+    const featured2 = featuredProducts.slice(3, 6)
+    const featured3 = featuredProducts.slice(6, 9)
+
     return (
         <div className="hp-page">
 
             <section className="hp-hero">
-                <img
-                    className="hp-hero-img"
-                    src="https://rusticandmain.com/cdn/shop/files/Oval-Lab-Diamond-Engagement-Ring-Pave-Band-The-Chloe-Rustic-And-Main_2_c461c610-8aa2-45b0-85a0-e111a0a170b0.jpg?v=1726152200"
-                    alt="Hero"
-                />
+                <img className="hp-hero-img" src="https://rusticandmain.com/cdn/shop/files/Oval-Lab-Diamond-Engagement-Ring-Pave-Band-The-Chloe-Rustic-And-Main_2_c461c610-8aa2-45b0-85a0-e111a0a170b0.jpg?v=1726152200" alt="Hero" />
                 <div className="hp-hero-content">
                     <p className="hp-hero-eyebrow">New Collection 2026</p>
                     <h1 className="hp-hero-title">Crafted for<br />the Extraordinary</h1>
@@ -77,20 +77,15 @@ export default function HomePage() {
                     <p className="hp-category-eyebrow">Collection</p>
                     <h2 className="hp-category-title">{CATEGORIES[0].name}</h2>
                     <p className="hp-category-desc">{CATEGORIES[0].description}</p>
-                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[0].id}`}>
-                        Shop Rings
-                    </Link>
+                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[0].id}`}>Shop Rings</Link>
                 </div>
             </section>
 
-            {featuredProducts.length > 0 && (
-                <section className="hp-featured">
-                    <p className="hp-featured-label">✦ &nbsp; Featured Pieces &nbsp; ✦</p>
-                    <div className="hp-featured-grid">
-                        {featuredProducts.map(product => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+            {featured1.length > 0 && (
+                <section className="hp-featured-strip">
+                    {featured1.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
                 </section>
             )}
 
@@ -100,11 +95,17 @@ export default function HomePage() {
                     <p className="hp-category-eyebrow">Collection</p>
                     <h2 className="hp-category-title">{CATEGORIES[1].name}</h2>
                     <p className="hp-category-desc">{CATEGORIES[1].description}</p>
-                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[1].id}`}>
-                        Shop Necklaces
-                    </Link>
+                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[1].id}`}>Shop Necklaces</Link>
                 </div>
             </section>
+
+            {featured2.length > 0 && (
+                <section className="hp-featured-strip">
+                    {featured2.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </section>
+            )}
 
             <section className={`hp-category ${CATEGORIES[2].fade}`}>
                 <img className="hp-category-img" src={CATEGORIES[2].image} alt="Earrings" />
@@ -112,11 +113,17 @@ export default function HomePage() {
                     <p className="hp-category-eyebrow">Collection</p>
                     <h2 className="hp-category-title">{CATEGORIES[2].name}</h2>
                     <p className="hp-category-desc">{CATEGORIES[2].description}</p>
-                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[2].id}`}>
-                        Shop Earrings
-                    </Link>
+                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[2].id}`}>Shop Earrings</Link>
                 </div>
             </section>
+
+            {featured3.length > 0 && (
+                <section className="hp-featured-strip">
+                    {featured3.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </section>
+            )}
 
             <section className={`hp-category ${CATEGORIES[3].fade}`}>
                 <img className="hp-category-img" src={CATEGORIES[3].image} alt="Bracelets" />
@@ -124,21 +131,19 @@ export default function HomePage() {
                     <p className="hp-category-eyebrow">Collection</p>
                     <h2 className="hp-category-title">{CATEGORIES[3].name}</h2>
                     <p className="hp-category-desc">{CATEGORIES[3].description}</p>
-                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[3].id}`}>
-                        Shop Bracelets
-                    </Link>
+                    <Link className="hp-category-btn" to={`/products?categoryId=${CATEGORIES[3].id}`}>Shop Bracelets</Link>
                 </div>
             </section>
 
             <section className="hp-story">
-                <p className="hp-story-flourish">✦ ✦ ✦</p>
-                <h2 className="hp-story-title">A Legacy of<br />Fine Craftsmanship</h2>
+                <p className="hp-story-flourish">✦</p>
+                <h2 className="hp-story-title">Every Piece Tells a Story</h2>
                 <p className="hp-story-text">
-                    Every piece in our collection is a testament to the art of jewellery making;
-                    where timeless design meets exceptional materials. We believe that fine jewellery
-                    is not merely an accessory, but a story worn close to the skin.
+                    Trinket Story was born from a belief that fine jewellery should be more than beautiful —
+                    it should be meaningful. Each piece in our collection is thoughtfully crafted to become
+                    part of your story, worn through the moments that matter most.
                 </p>
-                <Link className="hp-story-btn" to="/products">Discover the Collection</Link>
+                <Link className="hp-story-btn" to="/products">Explore the Collection</Link>
             </section>
 
         </div>
