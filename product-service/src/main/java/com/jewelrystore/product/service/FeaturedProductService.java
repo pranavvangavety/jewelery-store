@@ -4,7 +4,6 @@ import com.jewelrystore.product.dto.ProductResponse;
 import com.jewelrystore.product.entity.FeaturedProduct;
 import com.jewelrystore.product.entity.ProductStatus;
 import com.jewelrystore.product.exception.DuplicateResourceException;
-import com.jewelrystore.product.exception.InvalidOperationException;
 import com.jewelrystore.product.exception.ResourceNotFoundException;
 import com.jewelrystore.product.repository.FeaturedProductRepository;
 import com.jewelrystore.product.repository.ProductRepository;
@@ -18,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FeaturedProductService {
 
-    private static final int MAX_FEATURED = 6;
     private final FeaturedProductRepository featuredProductRepository;
     private final ProductService productService;
     private final ProductRepository productRepository;
@@ -31,14 +29,11 @@ public class FeaturedProductService {
 
     @Transactional
     public void addFeaturedProduct(Long productId){
-        if(featuredProductRepository.count() >= MAX_FEATURED) {
-            throw new InvalidOperationException("Cannot have more than " + MAX_FEATURED + " products");
-        }
         if(featuredProductRepository.existsByProductId(productId)){
             throw new DuplicateResourceException("Product " + productId + " is already featured");
         }
 
-        var product  = productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
+        var product = productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Active product not found with id: " + productId));
 
         featuredProductRepository.save(FeaturedProduct.builder().product(product).build());
