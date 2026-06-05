@@ -1,13 +1,16 @@
-import {useParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {useEffect, useState, useRef} from "react";
 import {addToCart} from "../api/cartApi.js";
-import {getProductById, getFeaturedProducts} from "../api/productApi.js";
+import {adminGetProductById} from "../api/adminApi.js";
 import "./ProductDetailsPage.css"
 import {useAuth} from "../context/AuthContext.jsx";
+import {getProductById, getFeaturedProducts} from "../api/productApi.js";
 import ProductCard from "../components/ProductCard.jsx";
 
 export default function ProductDetailsPage() {
     const {id} = useParams()
+    const [searchParams] = useSearchParams()
+    const isAdminPreview = searchParams.get('preview') === 'admin'
 
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -31,7 +34,9 @@ export default function ProductDetailsPage() {
     useEffect(() => {
         const fetchProduct = async () => {
             try{
-                const response = await getProductById(id)
+                const response = isAdminPreview
+                    ? await adminGetProductById(id)
+                    : await getProductById(id)
                 setProduct(response.data)
                 setSelectedVariant(response.data.variants[0] ?? null)
             } catch (err) {
@@ -57,6 +62,7 @@ export default function ProductDetailsPage() {
     }, [id])
 
     const handleAddToCart = async () => {
+        if (isAdminPreview) return
         if(!selectedVariant) return
         setCartStatus(null)
         try{
@@ -80,6 +86,13 @@ export default function ProductDetailsPage() {
     return (
         <>
             <div className="pdp-page">
+
+                {isAdminPreview && (
+                    <div className="pdp-preview-banner">
+                        <span>Admin Preview — this product is not visible to customers</span>
+                        <button className="pdp-preview-close" onClick={() => window.history.back()}>✕ Close Preview</button>
+                    </div>
+                )}
 
                 <div className="pdp-gallery">
                     <div className="pdp-main-image">

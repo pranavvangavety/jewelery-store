@@ -253,6 +253,12 @@ export default function CataloguePage() {
                                         >
                                             Edit
                                         </button>
+                                        <button
+                                            className="cat-action-btn"
+                                            onClick={() => navigate(`/admin/preview/${product.id}?preview=admin`)}
+                                        >
+                                            Preview
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

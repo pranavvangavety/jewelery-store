@@ -64,6 +64,7 @@ function App() {
                     <Route path="inventory" element={<InventoryPage />} />
                     <Route path="orders" element={<OrdersPage />} />
                     <Route path="featured" element={<FeaturedPage />} />
+                    <Route path="preview/:id" element={<ProductDetailsPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>
