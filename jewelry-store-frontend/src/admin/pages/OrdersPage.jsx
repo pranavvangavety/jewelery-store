@@ -177,12 +177,17 @@ export default function OrdersPage() {
                                                 className="ord-btn-view"
                                                 onClick={() => toggleExpand(order.id)}
                                             >
-                                                    <span
-                                                        className="ord-chevron"
-                                                        style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                                                    >
-                                                        &#8964;
-                                                    </span>
+                                                <svg
+                                                    className="ord-chevron"
+                                                    style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 14 14"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path d="M2 5L7 10L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
                                             </button>
                                         </td>
                                     </tr>

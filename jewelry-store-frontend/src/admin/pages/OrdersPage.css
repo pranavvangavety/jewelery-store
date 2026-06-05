@@ -135,13 +135,14 @@
     align-items: center;
 }
 
-.ord-btn-view:hover { color: var(--gold); }
-
 .ord-chevron {
-    display: inline-block;
-    font-size: 1.1rem;
-    line-height: 1;
+    display: block;
     transition: transform 0.2s ease;
+    color: var(--muted);
+}
+
+.ord-btn-view:hover .ord-chevron {
+    color: var(--gold);
 }
 
 
