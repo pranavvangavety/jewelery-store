@@ -210,3 +210,115 @@
 }
 
 .ord-items-table tr:last-child td { border-bottom: none; }
+
+.ord-status-update {
+    margin-top: 4px;
+}
+
+.ord-status-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.ord-status-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.ord-status-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.ord-status-error {
+    font-size: 0.65rem;
+    color: #c0392b;
+    margin-top: 8px;
+    letter-spacing: 0.03em;
+}
+
+.ord-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.ord-modal {
+    background: #111;
+    border: 1px solid var(--border);
+    padding: 40px 48px;
+    min-width: 380px;
+    max-width: 480px;
+}
+
+.ord-modal-title {
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+}
+
+.ord-modal-body {
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    line-height: 1.7;
+    margin-bottom: 32px;
+}
+
+.ord-modal-highlight {
+    color: var(--cream);
+}
+
+.ord-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.ord-modal-btn {
+    font-family: var(--font-body);
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    background: none;
+}
+
+.ord-modal-btn--cancel {
+    border-color: var(--border);
+    color: var(--muted);
+}
+
+.ord-modal-btn--cancel:hover {
+    border-color: var(--cream);
+    color: var(--cream);
+}
+
+.ord-modal-btn--confirm {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.ord-modal-btn--confirm:hover {
+    background: var(--gold);
+    color: var(--deep);
+}

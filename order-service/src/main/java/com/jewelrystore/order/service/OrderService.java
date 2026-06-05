@@ -213,6 +213,13 @@ public class OrderService {
         }
     }
 
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found for Order ID: " + orderId));
+        order.setOrderStatus(status);
+        return mapToResponse(orderRepository.save(order));
+    }
+
     private OrderResponse mapToResponse(Order order) {
         List<OrderItemResponse> items = order.getItems().stream()
                 .map(item -> OrderItemResponse.builder()

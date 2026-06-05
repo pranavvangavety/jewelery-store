@@ -94,3 +94,6 @@ export const adminGetAllOrders = () =>
 
 export const adminGetOrderById = (orderId) =>
     axiosInstance.get(`/orders/${orderId}`)
+
+export const adminUpdateOrderStatus = (orderId, status) =>
+    axiosInstance.patch(`/orders/${orderId}/status`, null, { params: { status } })

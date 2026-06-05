@@ -2,6 +2,7 @@ package com.jewelrystore.order.controller;
 
 import com.jewelrystore.order.dto.OrderResponse;
 import com.jewelrystore.order.dto.PlaceOrderRequest;
+import com.jewelrystore.order.entity.OrderStatus;
 import com.jewelrystore.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,13 @@ public class OrderController {
     @GetMapping("/history")
     public ResponseEntity<List<OrderResponse>> getOrdersByUser(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+    }
+
+    @PatchMapping("/{orderId}/status") //ADMIN
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam OrderStatus status
+            ) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
 }

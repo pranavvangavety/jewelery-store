@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { adminGetAllOrders } from '../../api/adminApi.js'
+import { adminGetAllOrders, adminUpdateOrderStatus } from '../../api/adminApi.js'
 import './OrdersPage.css'
 
 function formatDate(dateStr) {
@@ -34,6 +34,9 @@ export default function OrdersPage() {
     const [expandedId, setExpandedId] = useState(null)
     const [filterStatus, setFilterStatus] = useState('ALL')
     const [sortBy,setSortBy] = useState('date-desc')
+    const [pendingStatus, setPendingStatus]   = useState({})
+    const [confirmModal, setConfirmModal]     = useState(null)
+    const [statusError, setStatusError]       = useState({})
 
     useEffect(() => {
         async function fetchOrders() {
@@ -63,6 +66,25 @@ export default function OrdersPage() {
 
     function toggleExpand(orderId) {
         setExpandedId(prev => prev === orderId ? null : orderId)
+    }
+
+    function openConfirm(orderId, status) {
+        setConfirmModal({ orderId, status })
+    }
+
+    async function handleStatusUpdate() {
+        const { orderId, status } = confirmModal
+        setConfirmModal(null)
+        try {
+            const res = await adminUpdateOrderStatus(orderId, status)
+            setOrders(prev => prev.map(o => o.id === orderId ? res.data : o))
+            setStatusError(prev => ({ ...prev, [orderId]: null }))
+        } catch (err) {
+            setStatusError(prev => ({
+                ...prev,
+                [orderId]: err.response?.data?.message || 'Failed to update status'
+            }))
+        }
     }
 
     return (
@@ -186,6 +208,30 @@ export default function OrdersPage() {
                                                                 <p className="ord-detail-line ord-td-muted">{order.transactionId}</p>
                                                             </div>
                                                         )}
+
+                                                        <div className="ord-status-update">
+                                                            <p className="ord-detail-heading" style={{ marginTop: '24px' }}>Update Status</p>
+                                                            <div className="ord-status-row">
+                                                                <select
+                                                                    className="cat-filter-select"
+                                                                    value={pendingStatus[order.id] ?? order.orderStatus}
+                                                                    onChange={e => setPendingStatus(prev => ({ ...prev, [order.id]: e.target.value }))}
+                                                                >
+                                                                    {['PENDING_PAYMENT','CONFIRMED','SHIPPED','DELIVERED','CANCELLED','FAILED'].map(s => (
+                                                                        <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <button
+                                                                    className="ord-status-btn"
+                                                                    onClick={() => openConfirm(order.id, pendingStatus[order.id] ?? order.orderStatus)}
+                                                                >
+                                                                    Update
+                                                                </button>
+                                                            </div>
+                                                            {statusError[order.id] && (
+                                                                <p className="ord-status-error">{statusError[order.id]}</p>
+                                                            )}
+                                                        </div>
                                                     </div>
 
                                                     <div className="ord-detail-right">
@@ -224,6 +270,26 @@ export default function OrdersPage() {
                         </tbody>
                     </table>
                 </>
+            )}
+
+            {confirmModal && (
+                <div className="ord-modal-overlay" onClick={() => setConfirmModal(null)}>
+                    <div className="ord-modal" onClick={e => e.stopPropagation()}>
+                        <p className="ord-modal-title">Confirm Status Change</p>
+                        <p className="ord-modal-body">
+                            Change order <span className="ord-modal-highlight">#{confirmModal.orderId}</span> status
+                            to <span className="ord-modal-highlight">{confirmModal.status.replace('_', ' ')}</span>?
+                        </p>
+                        <div className="ord-modal-actions">
+                            <button className="ord-modal-btn ord-modal-btn--cancel" onClick={() => setConfirmModal(null)}>
+                                Cancel
+                            </button>
+                            <button className="ord-modal-btn ord-modal-btn--confirm" onClick={handleStatusUpdate}>
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </div>
