@@ -1,20 +1,17 @@
 package com.jewelrystore.auth.controller;
 
-import com.jewelrystore.auth.dto.AuthResponse;
-import com.jewelrystore.auth.dto.ErrorResponse;
-import com.jewelrystore.auth.dto.LoginRequest;
-import com.jewelrystore.auth.dto.RegisterRequest;
+import com.jewelrystore.auth.dto.*;
 import com.jewelrystore.auth.exception.DuplicateResourceException;
+import com.jewelrystore.auth.exception.EmailNotVerifiedException;
+import com.jewelrystore.auth.exception.InvalidOperationException;
 import com.jewelrystore.auth.exception.ResourceNotFoundException;
+
 import com.jewelrystore.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -63,6 +60,73 @@ public class AuthController {
                             .timestamp(LocalDateTime.now())
                             .build()
             );
+        } catch (EmailNotVerifiedException ex) {
+            return ResponseEntity.status(403).body(
+                    ErrorResponse.builder()
+                            .status(403).error("Forbidden")
+                            .message(ex.getMessage())
+                            .path("/auth/login")
+                            .timestamp(LocalDateTime.now()).build()
+            );
         }
+    }
+
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token){
+        try{
+            authService.verifyEmail(token);
+            return ResponseEntity.ok().build();
+        } catch (ResourceNotFoundException | InvalidOperationException ex) {
+            return ResponseEntity.status(400).body(
+                    ErrorResponse.builder()
+                            .status(400).error("Bad Request")
+                            .message(ex.getMessage())
+                            .path("/auth/verify-email")
+                            .timestamp(LocalDateTime.now()).build()
+            );
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try{
+            authService.resetPassword(request);
+            return ResponseEntity.ok().build();
+        } catch (ResourceNotFoundException | InvalidOperationException ex) {
+            return ResponseEntity.status(400).body(
+                    ErrorResponse.builder()
+                            .status(400).error("Bad Request")
+                            .message(ex.getMessage())
+                            .path("/auth/reset-password")
+                            .timestamp(LocalDateTime.now()).build()
+            );
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestHeader("X-User-Id") Long userId, @Valid @RequestBody ChangePasswordRequest request) {
+        try{
+            authService.changePassword(userId, request);
+            return ResponseEntity.ok().build();
+        } catch(BadCredentialsException ex){
+            return ResponseEntity.status(401).body(
+                    ErrorResponse.builder().status(401).error("Unauthorized")
+                            .message(ex.getMessage()).path("/auth/change-password")
+                            .timestamp(LocalDateTime.now()).build()
+            );
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.resendVerification(request);
+        return ResponseEntity.ok().build();
     }
 }
