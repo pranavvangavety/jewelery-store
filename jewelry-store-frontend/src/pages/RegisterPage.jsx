@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link} from "react-router-dom"
 import { registerUser } from "../api/authApi.js"
-import { useAuth } from "../context/AuthContext.jsx"
 import "./Auth.css"
 
 export default function RegisterPage() {
@@ -13,22 +12,44 @@ export default function RegisterPage() {
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
-    const { setCurrentUser } = useAuth()
-    const navigate = useNavigate()
+    const [submitted, setSubmitted] = useState(false)
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setLoading(true)
         setError(null)
+
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters')
+            return
+        }
+
+        setLoading(true)
         try {
-            const response = await registerUser(firstName, lastName, email, password)
-            setCurrentUser(response.data)
-            navigate('/')
+            await registerUser(firstName, lastName, email, password)
+            setSubmitted(true)
         } catch (err) {
             setError(err.response?.data?.message || 'Unable to create account')
         } finally {
             setLoading(false)
         }
+    }
+
+    if (submitted) {
+        return (
+            <div className="auth-page">
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <h1 className="auth-title">Almost There</h1>
+                        <p className="auth-subtitle">
+                            We've sent a verification link to your email. Please verify before signing in.
+                        </p>
+                    </div>
+                    <div className="auth-form">
+                        <Link to="/login" className="auth-submit-btn">Go to Sign In</Link>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (
