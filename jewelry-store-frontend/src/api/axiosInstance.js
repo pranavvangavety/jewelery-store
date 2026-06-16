@@ -8,7 +8,17 @@ axiosInstance.interceptors.request.use((config) => {
     const user = JSON.parse(localStorage.getItem('user'))
     const sessionId = localStorage.getItem('sessionId')
 
-    if(user?.token) {
+    const publicAuthPaths = [
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+        '/auth/verify-email',
+        '/auth/resend-verification',
+    ]
+    const isPublicAuth = publicAuthPaths.some(p => config.url?.startsWith(p))
+
+    if(user?.token && !isPublicAuth) {
         config.headers['Authorization'] = `Bearer ${user.token}`
     } else if(sessionId) {
         config.headers['X-Session-Id'] = sessionId
