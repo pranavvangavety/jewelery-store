@@ -20,6 +20,9 @@ import InventoryPage from "./admin/pages/InventoryPage.jsx";
 import OrdersPage from "./admin/pages/OrdersPage.jsx";
 import FeaturedPage from "./admin/pages/FeaturedPage.jsx";
 import Footer from "./components/Footer.jsx";
+import VerifyEmailPage from "./pages/VerifyEmailPage.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 function App() {
     return (
@@ -50,6 +53,9 @@ function App() {
                 }>
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Route>
 
                 <Route path="/admin" element={

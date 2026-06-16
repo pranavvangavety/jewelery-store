@@ -96,6 +96,23 @@
     color: var(--cream);
 }
 
+.auth-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.auth-link-btn:hover {
+    color: var(--gold-light);
+}
+
 .auth-error {
     font-size: 0.65rem;
     letter-spacing: 0.15em;
@@ -117,6 +134,8 @@
     cursor: pointer;
     transition: background 0.2s;
     margin-top: 8px;
+    display: block;
+    text-align: center;
 }
 
 .auth-submit-btn:hover:not(:disabled) {
