@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext.jsx"
 import { Link, useNavigate } from "react-router-dom"
-import { loginUser } from "../api/authApi.js"
+import {loginUser, resendVerification} from "../api/authApi.js"
 import "./Auth.css"
 import {mergeCart} from "../api/cartApi.js";
 
@@ -15,6 +15,9 @@ export default function LoginPage() {
     const { setCurrentUser,sessionId, setCartCount, user } = useAuth()
     const navigate = useNavigate()
 
+    const [needsVerification, setNeedsVerification] = useState(false)
+    const [resendStatus, setResendStatus] = useState(null)
+
     useEffect(() => {
         if (user) {
             user.role === 'ADMIN' ? navigate('/admin') : navigate('/')
@@ -25,6 +28,8 @@ export default function LoginPage() {
         e.preventDefault()
         setLoading(true)
         setError(null)
+        setNeedsVerification(false)
+        setResendStatus(null)
         try {
             const response = await loginUser(email, password)
             setCurrentUser(response.data)
@@ -38,11 +43,26 @@ export default function LoginPage() {
         } catch (err) {
             if (!err.response || err.response.status >= 500) {
                 setError('Unable to connect. Please try again later.')
-            } else {
+            } else if (err.response.status === 403) {
+                setError('Please verify your email before signing in.')
+                setNeedsVerification(true)
+            }
+            else {
                 setError('Invalid email or password')
             }
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleResend = async () => {
+        setResendStatus('sending')
+        try {
+            await resendVerification(email)
+        } catch (err) {
+            // resend is fire-and-forget; always show sent
+        } finally {
+            setResendStatus('sent')
         }
     }
 
@@ -57,6 +77,21 @@ export default function LoginPage() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     {error && <p className="auth-error">{error}</p>}
+                    {needsVerification && resendStatus !== 'sent' && (
+                        <p className="auth-footer">
+                            <button
+                                type="button"
+                                className="auth-link-btn"
+                                onClick={handleResend}
+                                disabled={resendStatus === 'sending'}
+                            >
+                                {resendStatus === 'sending' ? 'Sending...' : 'Resend verification email'}
+                            </button>
+                        </p>
+                    )}
+                    {resendStatus === 'sent' && (
+                        <p className="auth-footer">Verification email sent. Check your inbox.</p>
+                    )}
 
                     <input
                         className="auth-input"
@@ -93,6 +128,10 @@ export default function LoginPage() {
                         {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
+
+                <p className="auth-footer">
+                    <Link to="/forgot-password">Forgot password?</Link>
+                </p>
 
                 <p className="auth-footer">
                     Don't have an account? <Link to="/register">Create one</Link>
