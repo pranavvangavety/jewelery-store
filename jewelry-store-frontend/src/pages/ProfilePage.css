@@ -284,6 +284,34 @@
     color: #c0392b;
 }
 
+.profile-password-wrap {
+    position: relative;
+}
+
+.profile-password-wrap .profile-input {
+    padding-right: 56px;
+}
+
+.profile-show-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+.profile-show-btn:hover {
+    color: var(--cream);
+}
+
 /*For mobile*/
 
 @media (max-width: 768px) {

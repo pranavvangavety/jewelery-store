@@ -9,6 +9,7 @@ import {
     setDefaultAddress, updateAddress,
 } from "../api/userApi.js"
 import "./ProfilePage.css"
+import {changePassword} from "../api/authApi.js";
 
 export default function ProfilePage() {
     const { user, setCurrentUser } = useAuth()
@@ -30,6 +31,13 @@ export default function ProfilePage() {
     const [editForm, setEditForm] = useState({ street: '', city: '', state: '', zipCode: '', country: '' })
     const [editLoading, setEditLoading] = useState(false)
     const [editError, setEditError] = useState(null)
+
+    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    const [passwordLoading, setPasswordLoading] = useState(false)
+    const [passwordError, setPasswordError] = useState(null)
+    const [passwordSuccess, setPasswordSuccess] = useState(false)
+    const [visible, setVisible] = useState({ currentPassword: false, newPassword: false, confirmPassword: false })
+    const [showPasswordForm, setShowPasswordForm] = useState(false)
 
     useEffect(() => {
         if (!user) {
@@ -145,6 +153,38 @@ export default function ProfilePage() {
             setEditError(err.response?.data?.message || 'Failed to update address.')
         } finally {
             setEditLoading(false)
+        }
+    }
+
+    const handlePasswordChange = (e) => {
+        setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value })
+    }
+    const toggleVisible = (field) => setVisible(v => ({ ...v, [field]: !v[field] }))
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault()
+        setPasswordError(null)
+        setPasswordSuccess(false)
+
+        if (passwordForm.newPassword.length < 8) {
+            setPasswordError('New password must be at least 8 characters')
+            return
+        }
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            setPasswordError('Passwords do not match')
+            return
+        }
+
+        setPasswordLoading(true)
+        try {
+            await changePassword(passwordForm.currentPassword, passwordForm.newPassword)
+            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+            setShowPasswordForm(false)
+            setPasswordSuccess(true)
+        } catch (err) {
+            setPasswordError(err.response?.data?.message || 'Failed to change password. Please try again.')
+        } finally {
+            setPasswordLoading(false)
         }
     }
 
@@ -399,6 +439,93 @@ export default function ProfilePage() {
                             </div>
                         ))}
                     </div>
+                </section>
+
+                <section className="profile-section">
+                    <div className="profile-section-header">
+                        <button
+                            className="profile-add-btn"
+                            onClick={() => {
+                                setShowPasswordForm(v => !v)
+                                setPasswordError(null)
+                                setPasswordSuccess(false)
+                                setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                            }}
+                        >
+                            {showPasswordForm ? 'Cancel' : 'Change Password'}
+                        </button>
+                    </div>
+
+                    {passwordSuccess && <p className="profile-success">Password changed successfully.</p>}
+
+
+                    {showPasswordForm && (
+                        <form className="profile-form" onSubmit={handlePasswordSubmit}>
+                            <div className="profile-field">
+                                <label className="profile-label">Current Password</label>
+                                <div className="profile-password-wrap">
+                                    <input
+                                        className="profile-input"
+                                        type={visible.currentPassword ? 'text' : 'password'}
+                                        name="currentPassword"
+                                        value={passwordForm.currentPassword}
+                                        onChange={handlePasswordChange}
+                                        placeholder="Current password"
+                                        required
+                                    />
+                                    <button type="button" className="profile-show-btn" onClick={() => toggleVisible('currentPassword')}>
+                                        {visible.currentPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="profile-field">
+                                <label className="profile-label">New Password</label>
+                                <div className="profile-password-wrap">
+                                    <input
+                                        className="profile-input"
+                                        type={visible.newPassword ? 'text' : 'password'}
+                                        name="newPassword"
+                                        value={passwordForm.newPassword}
+                                        onChange={handlePasswordChange}
+                                        placeholder="New password"
+                                        required
+                                    />
+                                    <button type="button" className="profile-show-btn" onClick={() => toggleVisible('newPassword')}>
+                                        {visible.newPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="profile-field">
+                                <label className="profile-label">Confirm New Password</label>
+                                <div className="profile-password-wrap">
+                                    <input
+                                        className="profile-input"
+                                        type={visible.confirmPassword ? 'text' : 'password'}
+                                        name="confirmPassword"
+                                        value={passwordForm.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        placeholder="Confirm new password"
+                                        required
+                                    />
+                                    <button type="button" className="profile-show-btn" onClick={() => toggleVisible('confirmPassword')}>
+                                        {visible.confirmPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {passwordError && <p className="profile-error">{passwordError}</p>}
+
+                            <button
+                                type="submit"
+                                className="profile-save-btn"
+                                disabled={passwordLoading}
+                            >
+                                {passwordLoading ? 'Saving…' : 'Change Password'}
+                            </button>
+                        </form>
+                    )}
                 </section>
 
             </div>
