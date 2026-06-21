@@ -49,22 +49,24 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         HttpMethod method = exchange.getRequest().getMethod();
 
+        ServerWebExchange cleanedExchange = stripIdentityHeaders(exchange);
+
         if(isPublicPath(path)) {
-            return chain.filter(exchange);
+            return chain.filter(cleanedExchange);
         }
 
         if(HttpMethod.GET.equals(method) && isPublicGetPath(path)) {
-            return chain.filter(exchange);
+            return chain.filter(cleanedExchange);
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
 
         if(isOptionalPath(path)) {
             if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return chain.filter(exchange);
+                return chain.filter(cleanedExchange);
             }
 
-            return validateAndForward(exchange, chain, authHeader);
+            return validateAndForward(cleanedExchange, chain, authHeader);
         }
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -72,7 +74,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        return validateAndForward(exchange, chain, authHeader);
+        return validateAndForward(cleanedExchange, chain, authHeader);
 
     }
 
@@ -111,6 +113,15 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private boolean isOptionalPath(String path) {
         return OPTIONAL_PATHS.stream().anyMatch(path::startsWith);
+    }
+
+    private ServerWebExchange stripIdentityHeaders(ServerWebExchange exchange){
+        return exchange.mutate()
+                .request(r -> r.headers(headers -> {
+                    headers.remove("X-User-Id");
+                    headers.remove("X-User-Role");
+                }))
+                .build();
     }
 
     @Override
