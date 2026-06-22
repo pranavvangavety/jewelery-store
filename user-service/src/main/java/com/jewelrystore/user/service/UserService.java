@@ -197,8 +197,13 @@ public class UserService {
     }
 
     @Transactional
-    public AddressResponse getAddressById(Long addressId) {
-        Address address = addressRepository.findById(addressId)
+    public AddressResponse getAddressById(Long authId, Long addressId) {
+        UserProfile profile = userProfileRepository.findByAuthId(authId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: "+ addressId));
+
+        Address address = profile.getAddresses().stream()
+                .filter(a->a.getId().equals(addressId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + addressId));
 
         return AddressResponse.builder()
