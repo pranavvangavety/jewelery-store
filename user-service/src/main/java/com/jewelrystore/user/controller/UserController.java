@@ -64,7 +64,8 @@ public class UserController {
 
     @GetMapping("/addresses/{addressId}")
     public ResponseEntity<AddressResponse> getAddressById(
+            @RequestHeader("X-User-Id") Long authId,
             @PathVariable Long addressId) {
-        return ResponseEntity.ok(userService.getAddressById(addressId));
+        return ResponseEntity.ok(userService.getAddressById(authId, addressId));
     }
 }

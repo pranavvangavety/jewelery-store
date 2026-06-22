@@ -164,9 +164,14 @@ public class OrderService {
         return mapToResponse(savedOrder);
     }
 
-    public OrderResponse getOrder(Long orderId) {
+    public OrderResponse getOrder(Long orderId, Long userId, String role) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+        boolean isAdmin = "ADMIN".equals(role);
+        if(!isAdmin && !userId.equals(order.getUserId())){
+            throw new ResourceNotFoundException("Order not found: " + orderId);
+        }
+
         return mapToResponse(order);
     }
 

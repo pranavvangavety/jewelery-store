@@ -27,8 +27,11 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.getOrder(orderId));
+    public ResponseEntity<OrderResponse> getOrder(
+            @PathVariable Long orderId,
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader (value = "X-User-Role", required = false) String role ) {
+        return ResponseEntity.ok(orderService.getOrder(orderId, userId, role));
     }
 
     @GetMapping("/all") //ADMIN
