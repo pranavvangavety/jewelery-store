@@ -112,6 +112,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicGetPath(String path) {
+
+        if (path.equals("/api/inventory")) {
+            return false;
+        }
         return PUBLIC_GET_PATHS.stream().anyMatch(path::startsWith);
     }
 
