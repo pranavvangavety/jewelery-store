@@ -49,6 +49,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         HttpMethod method = exchange.getRequest().getMethod();
 
+
+        // Always use cleaned exchange and never the original raw exchange.
+        // Strip X-User-* on every request and re-add after JWT validation.
+
         ServerWebExchange cleanedExchange = stripIdentityHeaders(exchange);
 
         if(isPublicPath(path)) {
@@ -59,7 +63,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(cleanedExchange);
         }
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        String authHeader = cleanedExchange.getRequest().getHeaders().getFirst("Authorization");
 
         if(isOptionalPath(path)) {
             if(authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -70,8 +74,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         }
 
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            cleanedExchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return cleanedExchange.getResponse().setComplete();
         }
 
         return validateAndForward(cleanedExchange, chain, authHeader);
