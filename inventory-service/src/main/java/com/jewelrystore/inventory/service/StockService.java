@@ -44,7 +44,7 @@ public class StockService {
 
     @Transactional
     public StockResponse updateStock(Long variantId, StockRequest request) {
-        Stock stock = stockRepository.findByVariantId(variantId)
+        Stock stock = stockRepository.findByVariantIdForUpdate(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         stock.setQuantity(request.getQuantity());
@@ -80,7 +80,7 @@ public class StockService {
 
     @Transactional
     public StockResponse reserve(Long variantId, ReservationRequest request) {
-        Stock stock = stockRepository.findByVariantId(variantId)
+        Stock stock = stockRepository.findByVariantIdForUpdate(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         int available = stock.getQuantity() - stock.getReservedQuantity();
@@ -96,7 +96,7 @@ public class StockService {
 
     @Transactional
     public StockResponse release(Long variantId, ReservationRequest request) {
-        Stock stock = stockRepository.findByVariantId(variantId)
+        Stock stock = stockRepository.findByVariantIdForUpdate(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         int newReserved = stock.getReservedQuantity()  - request.getQuantity();
@@ -112,7 +112,7 @@ public class StockService {
 
     @Transactional
     public StockResponse confirm(Long variantId, ReservationRequest request) {
-        Stock stock = stockRepository.findByVariantId(variantId)
+        Stock stock = stockRepository.findByVariantIdForUpdate(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
         if(stock.getReservedQuantity() < request.getQuantity()) {
