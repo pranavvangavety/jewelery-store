@@ -1,32 +1,13 @@
-import { useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { getOrderById } from "../api/orderApi.js"
+import { useLocation, useNavigate } from "react-router-dom"
 import "./OrderConfirmationPage.css"
 
 export default function OrderConfirmationPage() {
-    const { orderId } = useParams()
     const navigate = useNavigate()
-    const [order, setOrder] = useState(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const location = useLocation()
+    // order comes from checkout's place-order response via router state
+    const order = location.state?.order
 
-    useEffect(() => {
-        const fetchOrder = async () => {
-            try {
-                const response = await getOrderById(orderId)
-                setOrder(response.data)
-            } catch (err) {
-                setError(err.response?.data?.message || 'Failed to load order')
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchOrder()
-    }, [orderId])
-
-    if (loading) return <div className="ocp-loading">Loading...</div>
-    if (error) return <div className="ocp-error">{error}</div>
-    if (!order) return null
+    if (!order) return <div className="ocp-error">Order details not available.</div>
 
     return (
         <div className="ocp-page">

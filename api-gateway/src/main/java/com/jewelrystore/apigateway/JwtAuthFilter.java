@@ -41,7 +41,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     );
 
     private static final List<String> OPTIONAL_PATHS = List.of(
-            "/api/cart"
+            "/api/cart",
+            "/api/orders"
     );
 
     @Override

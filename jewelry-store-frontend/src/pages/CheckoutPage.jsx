@@ -107,7 +107,8 @@ export default function CheckoutPage() {
 
             const response = await placeOrder(orderPayload)
             setCartCount(0)
-            navigate(`/orders/confirmation/${response.data.id}`)
+            // pass full order via router state, no re-fetch
+            navigate(`/orders/confirmation/${response.data.id}`, { state: { order: response.data } })
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to place order. Please try again.')
         } finally {
