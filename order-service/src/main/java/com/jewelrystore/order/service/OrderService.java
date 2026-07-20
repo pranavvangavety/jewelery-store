@@ -5,11 +5,11 @@ import com.jewelrystore.order.dto.client.*;
 import com.jewelrystore.order.entity.*;
 import com.jewelrystore.order.exception.InvalidOperationException;
 import com.jewelrystore.order.exception.ResourceNotFoundException;
+import com.jewelrystore.order.messaging.TransactionalEventPublisher;
 import com.jewelrystore.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TransactionalEventPublisher eventPublisher;
 
     @Qualifier("cartClient")
     private final RestClient cartClient;
@@ -150,7 +150,7 @@ public class OrderService {
                         savedOrder.getId(), ex);
             }
 
-            kafkaTemplate.send("order-placed", String.valueOf(savedOrder.getId()), mapToResponse(savedOrder));
+            eventPublisher.publishAfterCommit("order-placed", String.valueOf(savedOrder.getId()), mapToResponse(savedOrder));
             log.info("Order {} placed successfully", savedOrder.getId());
 
         } else {
@@ -182,7 +182,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> getOrdersByUser(Long userId) {
-        return orderRepository.findByIdOrderByCreatedAtDesc(userId)
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToResponse).toList();
     }
 

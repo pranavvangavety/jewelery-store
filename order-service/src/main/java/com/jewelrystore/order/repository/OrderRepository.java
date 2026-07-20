@@ -10,7 +10,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 //    List<Order> findByUserId(Long userId);
 
     @Query("SELECT o FROM Order o WHERE o.userId = :userId ORDER BY o.createdAt DESC")
-    List<Order> findByIdOrderByCreatedAtDesc(Long userId);
+    List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<Order> findAllByOrderByCreatedAtDesc();
 }

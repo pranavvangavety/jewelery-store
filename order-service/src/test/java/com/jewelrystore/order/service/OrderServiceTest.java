@@ -7,7 +7,9 @@ import com.jewelrystore.order.dto.client.PaymentResponse;
 import com.jewelrystore.order.entity.Order;
 import com.jewelrystore.order.entity.OrderStatus;
 import com.jewelrystore.order.entity.PaymentStatus;
+import com.jewelrystore.order.dto.OrderResponse;
 import com.jewelrystore.order.exception.ResourceNotFoundException;
+import com.jewelrystore.order.messaging.TransactionalEventPublisher;
 import com.jewelrystore.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class OrderServiceTest {
     @Mock private OrderRepository orderRepository;
-    @Mock private KafkaTemplate<String, Object> kafkaTemplate;
+    @Mock private TransactionalEventPublisher eventPublisher;
     @Mock private RestClient cartClient;
     @Mock private RestClient userClient;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private RestClient inventoryClient;
@@ -42,7 +43,7 @@ public class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, kafkaTemplate, cartClient, userClient, inventoryClient, paymentClient);
+        orderService = new OrderService(orderRepository, eventPublisher, cartClient, userClient, inventoryClient, paymentClient);
     }
 
     @Test
@@ -152,6 +153,36 @@ public class OrderServiceTest {
         verify(inventoryClient.post(), never()).uri("/inventory/2/confirm");
 
         verify(cartClient, never()).delete();
-        verifyNoInteractions(kafkaTemplate);
+        verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    void paymentSucceeds_publishesOrderPlacedEventWithOrderIdAsKey() {
+        CartItemResponse item1 = cartItem(1L, 2, "5.00");
+        CartResponse cart = cartWith(item1);
+        stubCartFetch(cart);
+
+        Order savedOrder = Order.builder()
+                .id(50L)
+                .userId(1L)
+                .orderStatus(OrderStatus.PENDING_PAYMENT)
+                .paymentStatus(PaymentStatus.PENDING)
+                .totalAmount(new BigDecimal("10.00"))
+                .items(Collections.emptyList())
+                .build();
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+
+        PaymentResponse successfulPayment = new PaymentResponse();
+        successfulPayment.setStatus("SUCCESS");
+        successfulPayment.setTransactionId("txn-123");
+        when(paymentClient.post().uri("/payments").body(any(Object.class)).retrieve().body(PaymentResponse.class))
+                .thenReturn(successfulPayment);
+
+        when(inventoryClient.post().uri("/inventory/1/confirm").body(any(Object.class)).retrieve().toBodilessEntity())
+                .thenReturn(null);
+
+        orderService.placeOrder(basicRequest(), 1L, null);
+
+        verify(eventPublisher, times(1)).publishAfterCommit(eq("order-placed"), eq("50"), any(OrderResponse.class));
     }
 }
