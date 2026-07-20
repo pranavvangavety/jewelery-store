@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "verification-token")
+@Table(name = "verification_token")
 @Data
 @Builder
 @NoArgsConstructor
