@@ -6,13 +6,13 @@ import com.jewelrystore.product.event.VariantCreatedEvent;
 import com.jewelrystore.product.exception.DuplicateResourceException;
 import com.jewelrystore.product.exception.InvalidOperationException;
 import com.jewelrystore.product.exception.ResourceNotFoundException;
+import com.jewelrystore.product.messaging.TransactionalEventPublisher;
 import com.jewelrystore.product.repository.CategoryRepository;
 import com.jewelrystore.product.repository.ProductImageRepository;
 import com.jewelrystore.product.repository.ProductRepository;
 import com.jewelrystore.product.repository.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +27,7 @@ public class ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
-    private final KafkaTemplate<String, VariantCreatedEvent> kafkaTemplate;
+    private final TransactionalEventPublisher eventPublisher;
 
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
@@ -64,7 +64,7 @@ public class ProductService {
         saved.getVariants().addAll(productVariantRepository.saveAll(variants));
 
         saved.getVariants().forEach(v ->
-                kafkaTemplate.send("variant-created", new VariantCreatedEvent(v.getId()))
+                eventPublisher.publishAfterCommit("variant-created", new VariantCreatedEvent(v.getId()))
         );
 
         log.info("Created product: {}", saved.getName());
@@ -167,7 +167,7 @@ public class ProductService {
                 .build();
 
         product.getVariants().add(productVariantRepository.save(variant));
-        kafkaTemplate.send("variant-created", new VariantCreatedEvent(variant.getId()));
+        eventPublisher.publishAfterCommit("variant-created", new VariantCreatedEvent(variant.getId()));
         productRepository.save(product);
         return mapToResponse(product);
     }
