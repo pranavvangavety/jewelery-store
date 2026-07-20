@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,13 +73,7 @@ public class OrderService {
             country = request.getShippingCountry();
         }
 
-        for (CartItemResponse item : cart.getItems()) {
-            inventoryClient.post()
-                    .uri("/inventory/" + item.getVariantId() + "/reserve")
-                    .body(new ReservationRequest(item.getQuantity()))
-                    .retrieve()
-                    .toBodilessEntity();
-        }
+        reserveAll(cart.getItems());
 
         BigDecimal total = cart.getItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
@@ -117,7 +112,6 @@ public class OrderService {
         orderItems.forEach(item -> item.setOrder(order));
         Order savedOrder = orderRepository.save(order);
 
-        clearCart(userId, sessionId);
 
         PaymentResponse payment = paymentClient.post()
                 .uri("/payments")
@@ -134,12 +128,26 @@ public class OrderService {
             savedOrder.setPaymentStatus(PaymentStatus.PAID);
             savedOrder.setTransactionId(payment.getTransactionId());
 
+
             for (CartItemResponse item : cart.getItems()) {
-                inventoryClient.post()
-                        .uri("/inventory/" + item.getVariantId() + "/confirm")
-                        .body(new ReservationRequest(item.getQuantity()))
-                        .retrieve()
-                        .toBodilessEntity();
+                try {
+                    inventoryClient.post()
+                            .uri("/inventory/" + item.getVariantId() + "/confirm")
+                            .body(new ReservationRequest(item.getQuantity()))
+                            .retrieve()
+                            .toBodilessEntity();
+                } catch (Exception ex) {
+                    log.error("CONFIRM FAILED after successful payment for order {}, variantId {} - " +
+                                    "reservation left dangling, needs manual reconciliation",
+                            savedOrder.getId(), item.getVariantId(), ex);
+                }
+            }
+
+            try {
+                clearCart(userId, sessionId);
+            } catch (Exception ex) {
+                log.error("Failed to clear cart for order {} - cart may contain stale items",
+                        savedOrder.getId(), ex);
             }
 
             kafkaTemplate.send("order-placed", String.valueOf(savedOrder.getId()), mapToResponse(savedOrder));
@@ -149,15 +157,9 @@ public class OrderService {
             savedOrder.setOrderStatus(OrderStatus.FAILED);
             savedOrder.setPaymentStatus(PaymentStatus.FAILED);
 
-            for (CartItemResponse item : cart.getItems()) {
-                inventoryClient.post()
-                        .uri("/inventory/" + item.getVariantId() + "/release")
-                        .body(new ReservationRequest(item.getQuantity()))
-                        .retrieve()
-                        .toBodilessEntity();
-            }
+            releaseReservations(cart.getItems());   // cart deliberately left intact
 
-            log.warn("Order {} payment failed", savedOrder.getId());
+            log.warn("Order {} payment failed - reservations released, cart preserved", savedOrder.getId());
         }
 
         orderRepository.save(savedOrder);
@@ -182,6 +184,43 @@ public class OrderService {
     public List<OrderResponse> getOrdersByUser(Long userId) {
         return orderRepository.findByIdOrderByCreatedAtDesc(userId)
                 .stream().map(this::mapToResponse).toList();
+    }
+
+
+    private void reserveAll(List<CartItemResponse> items) {
+        List<CartItemResponse> reserved = new ArrayList<>();
+        try {
+            for (CartItemResponse item : items) {
+                inventoryClient.post()
+                        .uri("/inventory/" + item.getVariantId() + "/reserve")
+                        .body(new ReservationRequest(item.getQuantity()))
+                        .retrieve()
+                        .toBodilessEntity();
+                reserved.add(item); // only after the call actually succeeds
+            }
+        } catch (Exception ex) {
+            log.warn("Reserve failed for order attempt; releasing {} already-reserved item(s)",
+                    reserved.size());
+            releaseReservations(reserved);
+            throw ex;
+        }
+    }
+
+
+    private void releaseReservations(List<CartItemResponse> items) {
+        for (CartItemResponse item : items) {
+            try {
+                inventoryClient.post()
+                        .uri("/inventory/" + item.getVariantId() + "/release")
+                        .body(new ReservationRequest(item.getQuantity()))
+                        .retrieve()
+                        .toBodilessEntity();
+            } catch (Exception ex) {
+                log.error("COMPENSATION FAILED: could not release {} units of variantId {} - " +
+                                "stock is now leaked and needs manual reconciliation",
+                        item.getQuantity(), item.getVariantId(), ex);
+            }
+        }
     }
 
     private CartResponse fetchCart(Long userId, String sessionId) {
