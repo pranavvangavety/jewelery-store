@@ -12,12 +12,12 @@ import com.jewelrystore.auth.event.UserRegisteredEvent;
 import com.jewelrystore.auth.exception.DuplicateResourceException;
 import com.jewelrystore.auth.exception.EmailNotVerifiedException;
 import com.jewelrystore.auth.exception.ResourceNotFoundException;
+import com.jewelrystore.auth.messaging.TransactionalEventPublisher;
 import com.jewelrystore.auth.repository.UserRepository;
 import com.jewelrystore.auth.repository.VerificationTokenRepository;
 import com.jewelrystore.auth.security.JwtUtil;
 import com.jewelrystore.auth.exception.InvalidOperationException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class AuthService {
     private final VerificationTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TransactionalEventPublisher eventPublisher;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -54,7 +54,7 @@ public class AuthService {
         userRepository.save(user);
 
         //kafka
-        kafkaTemplate.send("user-registered", UserRegisteredEvent.builder()
+        eventPublisher.publishAfterCommit("user-registered", UserRegisteredEvent.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
@@ -73,7 +73,7 @@ public class AuthService {
                 .build()
         );
 
-        kafkaTemplate.send("email-verification", EmailVerificationEvent.builder()
+        eventPublisher.publishAfterCommit("email-verification", EmailVerificationEvent.builder()
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .token(verificationToken)
@@ -141,7 +141,7 @@ public class AuthService {
                                     .used(false)
                             .build());
 
-                    kafkaTemplate.send("password-reset-requested", PasswordResetEvent.builder()
+                    eventPublisher.publishAfterCommit("password-reset-requested", PasswordResetEvent.builder()
                             .email(user.getEmail())
                             .firstName(user.getFirstName())
                             .token(token)
@@ -167,7 +167,7 @@ public class AuthService {
         vt.setUsed(true);
         tokenRepository.save(vt);
 
-        kafkaTemplate.send("password-changed", PasswordChangedEvent.builder()
+        eventPublisher.publishAfterCommit("password-changed", PasswordChangedEvent.builder()
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .build()
@@ -185,7 +185,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        kafkaTemplate.send("password-changed", PasswordChangedEvent.builder()
+        eventPublisher.publishAfterCommit("password-changed", PasswordChangedEvent.builder()
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .build()
@@ -208,7 +208,7 @@ public class AuthService {
                             .used(false)
                     .build());
 
-            kafkaTemplate.send("email-verification", EmailVerificationEvent.builder()
+            eventPublisher.publishAfterCommit("email-verification", EmailVerificationEvent.builder()
                     .email(user.getEmail())
                     .firstName(user.getFirstName())
                     .token(token)
