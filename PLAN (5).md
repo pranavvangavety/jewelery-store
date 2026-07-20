@@ -616,3 +616,8 @@ that decision.
     than finishing backend test coverage in Phase 5.
   - **Revisit if:** you want frontend-testing specifically as a demonstrated skill, or a
     frontend regression makes the case for it directly.
+
+- [ ] **Register enumeration oracle.** `/auth/register` returns a distinct 409 on
+  duplicate email, revealing which emails are registered. Accepted for portfolio scope.
+  Close later by making the response generic + emailing the existing user. (Rate limiting
+  from 3.3 partially mitigates by throttling probe speed.)
