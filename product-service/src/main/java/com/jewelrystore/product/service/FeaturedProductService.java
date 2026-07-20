@@ -24,7 +24,7 @@ public class FeaturedProductService {
     @Transactional(readOnly = true)
     public List<ProductResponse> getFeaturedProducts(){
 
-        return featuredProductRepository.findAll().stream().map(fp -> productService.mapToResponse(fp.getProduct())).toList();
+        return featuredProductRepository.findAllByOrderByIdAsc().stream().map(fp -> productService.mapToResponse(fp.getProduct())).toList();
     }
 
     @Transactional

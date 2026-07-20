@@ -7,6 +7,7 @@ import com.jewelrystore.product.entity.Material;
 import com.jewelrystore.product.entity.Product;
 import com.jewelrystore.product.entity.ProductVariant;
 import com.jewelrystore.product.event.VariantCreatedEvent;
+import com.jewelrystore.product.exception.DuplicateResourceException;
 import com.jewelrystore.product.messaging.TransactionalEventPublisher;
 import com.jewelrystore.product.repository.CategoryRepository;
 import com.jewelrystore.product.repository.ProductImageRepository;
@@ -23,10 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,6 +126,37 @@ class ProductServiceTest {
         productService.addVariant(1L, request);
 
         verify(eventPublisher, times(1)).publishAfterCommit(eq("variant-created"), any(VariantCreatedEvent.class));
+    }
+
+    @Test
+    void addVariant_whenSkuAlreadyExists_throwsDuplicateResourceException() {
+        Category category = Category.builder()
+                .id(1L)
+                .name("Rings")
+                .slug("rings")
+                .build();
+
+        Product product = Product.builder()
+                .id(1L)
+                .name("Ring")
+                .material(Material.GOLD)
+                .category(category)
+                .variants(new ArrayList<>())
+                .build();
+
+        ProductVariantRequest request = new ProductVariantRequest();
+        request.setSku("SKU-2");
+        request.setPrice(BigDecimal.ONE);
+        request.setColor("Silver");
+        request.setSize("L");
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productVariantRepository.existsBySku("SKU-2")).thenReturn(true);
+
+        assertThatThrownBy(() -> productService.addVariant(1L, request))
+                .isInstanceOf(DuplicateResourceException.class);
+
+        verifyNoInteractions(eventPublisher);
     }
 
     @SuppressWarnings("unchecked")

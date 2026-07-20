@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByStatus(ProductStatus status);
+    List<Product> findByStatusOrderByIdAsc(ProductStatus status);
     List<Product> findByCategoryIdAndStatus(Long categoryId, ProductStatus status);
     Optional<Product> findByIdAndStatus(Long id, ProductStatus status);
     boolean existsByCategoryId(Long categoryId);

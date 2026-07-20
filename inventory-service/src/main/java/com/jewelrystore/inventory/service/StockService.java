@@ -47,6 +47,10 @@ public class StockService {
         Stock stock = stockRepository.findByVariantIdForUpdate(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Stock not found for variantId: " + variantId));
 
+        if (request.getQuantity() < stock.getReservedQuantity()) {
+            throw new InvalidOperationException("Cannot set quantity below reserved quantity for variantId: " + variantId);
+        }
+
         stock.setQuantity(request.getQuantity());
         stockRepository.save(stock);
         log.info("Updated stock for variantId: {}", variantId);

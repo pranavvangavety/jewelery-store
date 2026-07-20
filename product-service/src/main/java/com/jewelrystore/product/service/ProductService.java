@@ -74,7 +74,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllActiveProducts() {
-        return productRepository.findByStatus(ProductStatus.ACTIVE)
+        return productRepository.findByStatusOrderByIdAsc(ProductStatus.ACTIVE)
                 .stream().map(this::mapToResponse)
                 .toList();
     }
@@ -155,7 +155,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
 
         if(productVariantRepository.existsBySku(request.getSku())) {
-            throw new ResourceNotFoundException("SKU already exists: " + request.getSku());
+            throw new DuplicateResourceException("SKU already exists: " + request.getSku());
         }
 
         ProductVariant variant = ProductVariant.builder()
@@ -295,7 +295,7 @@ public class ProductService {
                         .price(v.getPrice())
                         .color(v.getColor())
                         .size(v.getSize())
-                        .images(v.getImages().stream()
+                        .images(productImageRepository.findByVariantIdOrderByDisplayOrder(v.getId()).stream()
                                 .map(i -> ProductImageResponse.builder()
                                         .id(i.getId())
                                         .url(i.getUrl())
