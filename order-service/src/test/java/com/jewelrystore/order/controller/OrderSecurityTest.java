@@ -28,10 +28,9 @@ class OrderSecurityTest {
     @MockitoBean private OrderService orderService;
 
     @Test
-    // no custom entryPoint here; SecurityConfig defaults to 403, not 401
     void getAllOrders_withoutIdentity_isRejected() throws Exception {
         mockMvc.perform(get("/orders/all"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -52,10 +51,9 @@ class OrderSecurityTest {
     }
 
     @Test
-    // no custom entryPoint here; SecurityConfig defaults to 403, not 401
     void updateOrderStatus_withoutIdentity_isRejected() throws Exception {
         mockMvc.perform(patch("/orders/1/status").param("status", OrderStatus.CONFIRMED.name()))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
