@@ -94,7 +94,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
             String userId = claims.get("userId", Long.class).toString();
             String role = claims.get("role", String.class);
-            log.info("Extracted userId: {}, role: {}, forwarding headers", userId, role);
+            log.info("Token validated, forwarding headers");
 
             ServerWebExchange modifiedExchange = exchange.mutate()
                     .request(r -> r.header("X-User-Id", userId).header("X-User-Role", role))

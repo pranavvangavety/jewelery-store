@@ -29,10 +29,10 @@ public class UserService {
 
     @KafkaListener(topics = "user-registered", groupId = "user-service-group")
     public void handleUserRegistered(UserRegisteredEvent event) {
-        log.info("Received user registered event for email : {}", event.getEmail());
+        log.info("Received user registered event for authId : {}", event.getUserId());
 
         if(userProfileRepository.existsByEmail(event.getEmail())) {
-            log.warn("UserProfile already exists for email : {}", event.getEmail());
+            log.warn("UserProfile already exists for authId : {}", event.getUserId());
             return;
         }
 
@@ -44,7 +44,7 @@ public class UserService {
                 .build();
 
         userProfileRepository.save(profile);
-        log.info("Created UserProfile for email : {}", event.getEmail());
+        log.info("Created UserProfile for authId : {}", event.getUserId());
     }
 
     @Transactional

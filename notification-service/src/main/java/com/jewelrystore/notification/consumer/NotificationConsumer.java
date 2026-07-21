@@ -19,25 +19,25 @@ public class NotificationConsumer {
 
     @KafkaListener(topics = "email-verification", groupId = "notification-service-group")
     public void handleEmailVerification(EmailVerificationEvent event) {
-        log.info("Received email-verification event for: {}", event.getEmail());
+        log.info("Received email-verification event");
         notificationService.sendEmailVerification(event);
     }
 
     @KafkaListener(topics = "password-reset-requested", groupId = "notification-service-group")
     public void handlePasswordReset(PasswordResetEvent event) {
-        log.info("Received password-reset-requested event for: {}", event.getEmail());
+        log.info("Received password-reset-requested event");
         notificationService.sendPasswordReset(event);
     }
 
     @KafkaListener(topics = "password-changed", groupId = "notification-service-group")
     public void handlePasswordChanged(PasswordChangedEvent event) {
-        log.info("Received password-changed event for: {}", event.getEmail());
+        log.info("Received password-changed event");
         notificationService.sendPasswordChanged(event);
     }
 
     @KafkaListener(topics = "user-registered", groupId = "notification-service-group")
     public void handleUserRegistered(UserRegisteredEvent event) {
-        log.info("Received user-registered event for: {}", event.getEmail());
+        log.info("Received user-registered event for authId: {}", event.getUserId());
         notificationService.sendWelcome(event);
     }
 }
