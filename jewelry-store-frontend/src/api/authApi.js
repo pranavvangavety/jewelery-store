@@ -27,3 +27,7 @@ export const changePassword = (currentPassword, newPassword) => {
 export const resendVerification = (email) => {
     return axiosInstance.post('/auth/resend-verification', { email })
 }
+
+export const logoutUser = () => {
+    return axiosInstance.post('/auth/logout')
+}

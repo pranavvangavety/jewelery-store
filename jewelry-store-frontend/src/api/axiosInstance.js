@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: '/api'
+    baseURL: '/api',
+    withCredentials: true
 })
 
 axiosInstance.interceptors.request.use((config) => {
@@ -18,9 +19,8 @@ axiosInstance.interceptors.request.use((config) => {
     ]
     const isPublicAuth = publicAuthPaths.some(p => config.url?.startsWith(p))
 
-    if(user?.token && !isPublicAuth) {
-        config.headers['Authorization'] = `Bearer ${user.token}`
-    } else if(sessionId) {
+    // logged-in requests rely on the httpOnly cookie now
+    if(!(user?.token && !isPublicAuth) && sessionId) {
         config.headers['X-Session-Id'] = sessionId
     }
 

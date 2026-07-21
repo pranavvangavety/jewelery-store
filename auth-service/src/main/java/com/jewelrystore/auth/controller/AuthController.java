@@ -9,10 +9,14 @@ import com.jewelrystore.auth.exception.ResourceNotFoundException;
 import com.jewelrystore.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @RestController
@@ -20,7 +24,45 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final String JWT_COOKIE_NAME = "jwt";
+
     private final AuthService authService;
+
+    @Value("${cookie.secure}")
+    private boolean cookieSecure;
+
+    @Value("${cookie.samesite}")
+    private String cookieSameSite;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
+
+    private ResponseCookie buildAuthCookie(String token) {
+        return ResponseCookie.from(JWT_COOKIE_NAME, token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
+                .path("/")
+                .maxAge(Duration.ofMillis(jwtExpirationMs))
+                .build();
+    }
+
+    private ResponseCookie buildClearCookie() {
+        return ResponseCookie.from(JWT_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
+                .path("/")
+                .maxAge(0)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, buildClearCookie().toString())
+                .build();
+    }
 
     @PostMapping("/register")
 //    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -49,7 +91,10 @@ public class AuthController {
 //    }
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
-            return ResponseEntity.ok(authService.login(request));
+            AuthResponse response = authService.login(request);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, buildAuthCookie(response.getToken()).toString())
+                    .body(response);
         } catch (ResourceNotFoundException | BadCredentialsException ex) {
             return ResponseEntity.status(401).body(
                     ErrorResponse.builder()

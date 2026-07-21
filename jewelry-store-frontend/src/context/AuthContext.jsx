@@ -1,4 +1,5 @@
 import {createContext, useContext, useState} from "react";
+import {logoutUser} from "../api/authApi.js";
 
 const AuthContext = createContext(null)
 
@@ -30,7 +31,12 @@ export function AuthProvider({children}) {
         localStorage.setItem('user', JSON.stringify(userData))
     }
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await logoutUser()
+        } catch (e) {
+            // proceed with local cleanup even if the call fails
+        }
         setUser(null)
         localStorage.removeItem('user')
         window.location.href = '/'

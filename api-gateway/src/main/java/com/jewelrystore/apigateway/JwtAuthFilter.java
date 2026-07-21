@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,13 +25,16 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    private static final String JWT_COOKIE_NAME = "jwt";
+
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/verify-email",
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
-            "/api/auth/resend-verification"
+            "/api/auth/resend-verification",
+            "/api/auth/logout"
     );
 
     private static final List<String> PUBLIC_GET_PATHS = List.of(
@@ -64,28 +68,41 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(cleanedExchange);
         }
 
-        String authHeader = cleanedExchange.getRequest().getHeaders().getFirst("Authorization");
+        String token = extractToken(cleanedExchange);
 
         if(isOptionalPath(path)) {
-            if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if(token == null) {
                 return chain.filter(cleanedExchange);
             }
 
-            return validateAndForward(cleanedExchange, chain, authHeader);
+            return validateAndForward(cleanedExchange, chain, token);
         }
 
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if(token == null) {
             cleanedExchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return cleanedExchange.getResponse().setComplete();
         }
 
-        return validateAndForward(cleanedExchange, chain, authHeader);
+        return validateAndForward(cleanedExchange, chain, token);
 
     }
 
-    private Mono<Void> validateAndForward(ServerWebExchange exchange, GatewayFilterChain chain, String authHeader) {
+    private String extractToken(ServerWebExchange exchange) {
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst(JWT_COOKIE_NAME);
+        if(cookie != null) {
+            return cookie.getValue();
+        }
+
+        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        if(authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        return null;
+    }
+
+    private Mono<Void> validateAndForward(ServerWebExchange exchange, GatewayFilterChain chain, String token) {
         try {
-            String token = authHeader.substring(7);
             Claims claims = Jwts.parser()
                     .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
                     .build()
@@ -115,6 +132,9 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private boolean isPublicGetPath(String path) {
 
         if (path.equals("/api/inventory")) {
+            return false;
+        }
+        if (path.equals("/api/products/all") || path.startsWith("/api/products/all/")) {
             return false;
         }
         return PUBLIC_GET_PATHS.stream().anyMatch(path::startsWith);
